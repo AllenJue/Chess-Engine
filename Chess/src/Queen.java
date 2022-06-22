@@ -27,6 +27,16 @@ public class Queen extends Piece {
 	}
 
 	/**
+	 * Constructor for a specific type at row and col
+	 * @param pType
+	 * @param row
+	 * @param col
+	 */
+	public Queen(char pType, int row, int col) {
+		super(pType, row, col);
+	}
+	
+	/**
 	 * Gets the valid moveset for a Queen. Looks diagonally in four directions 
 	 * and laterally in four directions
 	 * @param b the functional Board the queen is on

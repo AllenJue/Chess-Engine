@@ -27,6 +27,16 @@ public class Bishop extends Piece {
 	}
 	
 	/**
+	 * Constructor for a specific type at row and col
+	 * @param pType
+	 * @param row
+	 * @param col
+	 */
+	public Bishop(char pType, int row, int col) {
+		super(pType, row, col);
+	}
+	
+	/**
 	 * Gets the valid bishop moves if it is the correct turn
 	 * @param p bishop selected
 	 * @param i current row

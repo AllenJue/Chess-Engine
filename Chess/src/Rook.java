@@ -29,6 +29,16 @@ public class Rook extends Piece {
 	}
 
 	/**
+	 * Constructor for a specific type at row and col
+	 * @param pType
+	 * @param row
+	 * @param col
+	 */
+	public Rook(char pType, int row, int col) {
+		super(pType, row, col);
+	}
+	
+	/**
 	 * Gets the valid moveset for a rook at row i and column j
 	 * @param b functional board containing the piece
 	 * @param i row of Rook
@@ -46,10 +56,11 @@ public class Rook extends Piece {
 	}
 	
 	/**
-	 * Sets castling rights to false
+	 * Sets castling rights to change
+	 * @param change update to castling rights
 	 */
-	public void removeCastlingRights() {
-		castlingRights = false;
+	public void setCastlingRights(boolean change) {
+		castlingRights = change;
 	}
 	
 	/**

@@ -29,6 +29,15 @@ public class Pawn extends Piece {
 		en_passant = 0;
 	}
 	
+	/**
+	 * Constructor for a specific type at row and col
+	 * @param pType
+	 * @param row
+	 * @param col
+	 */
+	public Pawn(char pType, int row, int col) {
+		super(pType, row, col);
+	}
 	
 	/**
 	 * Gets the valid pawn moves if it is the correct turn
@@ -73,7 +82,7 @@ public class Pawn extends Piece {
 			if(b.inBounds(i, colChange) && !b.isEmpty(i, colChange)) {
 				Piece target = b.getPiece(i, colChange);
 				if(target.isWhite() != p.isWhite() && target.isPawn() 
-						&& target.getPly() == b.getPly() - 1
+						&& target.getPly() == b.getPly()
 						&& b.kingSafeWithMove(isWhite(), i, j, forwardMove, colChange)) {
 					int rowChange = p.isWhite() ? -1 : 1;
 					moves.add(new int[] {i + rowChange, colChange});
@@ -106,13 +115,24 @@ public class Pawn extends Piece {
 	}
 	
 	/**
-	 * Sets the en_passant ply of a pawn
-	 * @param b
+	 * Sets the en_passant ply of a pawn to the board state
+	 * @param b functional board
 	 */
 	public void setPly(Board b) {
 		this.en_passant = b.getPly();
 	}
 	
+	/**
+	 * Sets the en_passant ply of a pawn to a specified int
+	 * @param ply specified ply
+	 */ 
+	public void setPly(int ply) {
+		this.en_passant = ply;
+	}
+	
+	/**
+	 * Gets the ply of the piece when it was last moved two squares
+	 */
 	public int getPly() {
 		return en_passant;
 	}

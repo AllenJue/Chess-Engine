@@ -13,9 +13,8 @@ import java.util.ArrayList;
 public abstract class Piece {
 	public static final int[] DIAGONAL_DIR = new int[] {-1, -1, 1, 1, -1};
 	public static final int[] LATERAL_DIR = new int[] {-1, 0 , 1, 0, -1};
-	private final char[] classifier = new char[] {'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R', 'P', 'E'}; // King, queen, rook, bishop, knight pawn
+	private static final char[] classifier = new char[] {'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R', 'P'}; // King, queen, rook, bishop, knight pawn
 	private char type;
-	private int value;
 	private boolean white;
 	private int r;
 	private int c;
@@ -23,14 +22,14 @@ public abstract class Piece {
 	/**
 	 * Constructor for a general piece, with type pType in row
 	 * @param pType piece type for the Piece object
-	 * @param row location of piece
+	 * @param row of piece
+	 * @param col column of piece
 	 */
 	public Piece(int pType, int row, int col) {
 		type = classifier[pType];
 		r = row;
 		c = col;
 		white = row >= 6;
-		value = 0; // TODO
 	}
 	
 	/**
@@ -39,10 +38,22 @@ public abstract class Piece {
 	 */
 	public Piece(Piece p) {
 		type = p.type;
-		value = p.value;
 		white = p.white;
 		r = p.r;
 		c = p.c;
+	}
+	
+	/**
+	 * Constructor for piece based on FEN character
+	 * @param pType type of piece as a character (lower case is black)
+	 * @param row of piece
+	 * @param col column of piece
+	 */
+	public Piece(char pType, int row, int col) {
+		r = row;
+		c = col;
+		white = Character.isUpperCase(pType);
+		type = Character.toUpperCase(pType);
 	}
 	
 	/**
@@ -62,11 +73,11 @@ public abstract class Piece {
 	}
 	
 	/**
-	 * Gets the specific type of a piece
-	 * @return the String representation of this.type
+	 * Gets the character representation of a piece
+	 * @return the type of the piece
 	 */
-	public String getType() {
-		return Character.toString(this.type);
+	public char getType() {
+		return this.type;
 	}
 	
 	/**
@@ -144,13 +155,26 @@ public abstract class Piece {
 	/**
 	 * Sets castling rights for King and Rook
 	 */
-	public void removeCastlingRights() {
+	public void setCastlingRights(boolean change) {
 		// holder for King and rook; other pieces can not castle
 	}
 	
+	/**
+	 * Sets the plt of a piece to a board state
+	 * @param b functional board
+	 */
 	public void setPly(Board b) {
 		// holder for Pawn setting ply
 	}
+	
+	/**
+	 * Sets the ply of a piece to a specified number
+	 * @param ply of piece move
+	 */
+	public void setPly(int ply) {
+		// holder for Pawn setting ply
+	}
+	
 	
 	/**
 	 * Gets castling rights for King and ROok
@@ -161,26 +185,50 @@ public abstract class Piece {
 		return false;
 	}
 	
+	/**
+	 * Gets if a piece is a queen type
+	 * @return this.type == 'Q'
+	 */
 	public boolean isQueen() {
 		return this.type == 'Q';
 	}
 	
+	/**
+	 * Gets if a piece is a pawn type
+	 * @return this.type == 'P'
+	 */
 	public boolean isPawn() {
 		return this.type == 'P';
 	}
 	
+	/**
+	 * Gets if a piece is a King type
+	 * @return this.type == 'K'
+	 */
 	public boolean isKing() {
 		return this.type == 'K';
 	}
 	
+	/**
+	 * Gets if a piece is a knight type
+	 * @return this.type == 'N'
+	 */
 	public boolean isKnight() {
 		return this.type == 'N';
 	}
 	
+	/**
+	 * Gets if a piece is a bishop type
+	 * @return this.type == 'B'
+	 */
 	public boolean isBishop() {
 		return this.type == 'B';
 	}
 	
+	/**
+	 * Gets if a piece is a rook type
+	 * @return this.type == 'R'
+	 */
 	public boolean isRook() {
 		return this.type == 'R';
 	}

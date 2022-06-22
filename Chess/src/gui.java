@@ -10,11 +10,9 @@
 import javax.imageio.ImageIO;
 import javax.swing.*; 
 import javax.swing.border.EmptyBorder;
-import javax.swing.plaf.metal.MetalBorders.ToolBarBorder;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.GridBagLayout;
@@ -23,7 +21,6 @@ import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
@@ -34,20 +31,25 @@ public class gui extends JFrame {
 	// gui which holds the board and toolbar
 	private final JPanel mainGui = new JPanel(new BorderLayout(3, 3)); 
 	private final Image[][] pieceIcons = new Image[2][6];
+	private final JToolBar tools;
 	
 	// board which contains the grid of squares (JButtons)
 	private JPanel board;
 	private JButton[][] boardSquares;
 		
 	// used for managing the gui
+	private JLabel gameText;
 	private JLabel turnCounter;
 	private List<JButton> hovered = new ArrayList<>();
 	private HashSet<JButton> validSquares = new HashSet<>();
 	private boolean squareSelected = false;
 	private boolean sameSelectedBuffer = false;
-	private boolean establishedBorder = false;
+	private boolean gameHalt = false;
 	private Point lastP = null;
 	
+	private final String[] testFEN = new String[] {"rnb1kbnr/pppp1ppp/8/4p3/6Pq/5P2/PPPPP2P/RNBQKBNR w KQkq - 1 3",
+			"8/2b5/2knRP2/2p4p/r7/4N2P/3RK3/8 b - - 0 56",
+			"2r1nbk1/5p1p/p5p1/1N2Q3/q3P3/6Pb/2P2P1P/1R2N1K1 w - - 0 33"};
 	/**
 	 * Launch the application.
 	 */
@@ -74,9 +76,8 @@ public class gui extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		mainGui.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setBounds(100, 100, 550, 550);
-		
 		// Insert toolbar
-		JToolBar tools = new JToolBar();
+		tools = new JToolBar();
         tools.setFloatable(false);
         mainGui.add(tools, BorderLayout.PAGE_START);
         initializeToolBar(tools, b);
@@ -100,20 +101,32 @@ public class gui extends JFrame {
 	private void initializeIcons() {
 		try {
 			// white pieces
-			pieceIcons[0][0] = ImageIO.read(getClass().getResource("/whitePawn.png"));
-			pieceIcons[0][1] = ImageIO.read(getClass().getResource("/whiteKing.png"));
-			pieceIcons[0][2] = ImageIO.read(getClass().getResource("/whiteKnight.png"));
-			pieceIcons[0][3] = ImageIO.read(getClass().getResource("/whiteBishop.png"));
-			pieceIcons[0][4] = ImageIO.read(getClass().getResource("/whiteRook.png"));
-			pieceIcons[0][5] = ImageIO.read(getClass().getResource("/whiteQueen.png"));
-			// black pieces
-			pieceIcons[1][0] = ImageIO.read(getClass().getResource("/blackPawn.png"));
-			pieceIcons[1][1] = ImageIO.read(getClass().getResource("/blackKing.png"));
-			pieceIcons[1][2] = ImageIO.read(getClass().getResource("/blackKnight.png"));
-			pieceIcons[1][3] = ImageIO.read(getClass().getResource("/blackBishop.png"));
-			pieceIcons[1][4] = ImageIO.read(getClass().getResource("/blackRook.png"));
-			pieceIcons[1][5] = ImageIO.read(getClass().getResource("/blackQueen.png"));
-			// pieceIcons[1][0] = ImageIO.read(getClass().getResource("/blackPawn.png"));
+			// TODO implement switching between funny and styled icons
+//			pieceIcons[0][0] = ImageIO.read(getClass().getResource("/Funny-icons/whitePawn.png"));
+//			pieceIcons[0][1] = ImageIO.read(getClass().getResource("/Funny-icons/whiteKing.png"));
+//			pieceIcons[0][2] = ImageIO.read(getClass().getResource("/Funny-icons/whiteKnight.png"));
+//			pieceIcons[0][3] = ImageIO.read(getClass().getResource("/Funny-icons/whiteBishop.png"));
+//			pieceIcons[0][4] = ImageIO.read(getClass().getResource("/Funny-icons/whiteRook.png"));
+//			pieceIcons[0][5] = ImageIO.read(getClass().getResource("/Funny-icons/whiteQueen.png"));
+			pieceIcons[0][0] = ImageIO.read(getClass().getResource("/Styled-icons/WhitePawnStyled.png"));
+			pieceIcons[0][1] = ImageIO.read(getClass().getResource("/Styled-icons/WhiteKingStyled.png"));
+			pieceIcons[0][2] = ImageIO.read(getClass().getResource("/Styled-icons/WhiteKnightStyled.png"));
+			pieceIcons[0][3] = ImageIO.read(getClass().getResource("/Styled-icons/WhiteBishopStyled.png"));
+			pieceIcons[0][4] = ImageIO.read(getClass().getResource("/Styled-icons/WhiteRookStyled.png"));
+			pieceIcons[0][5] = ImageIO.read(getClass().getResource("/Styled-icons/WhiteQueenStyled.png"));
+//			// black pieces
+//			pieceIcons[1][0] = ImageIO.read(getClass().getResource("/Funny-icons/blackPawn.png"));
+//			pieceIcons[1][1] = ImageIO.read(getClass().getResource("/Funny-icons/blackKing.png"));
+//			pieceIcons[1][2] = ImageIO.read(getClass().getResource("/Funny-icons/blackKnight.png"));
+//			pieceIcons[1][3] = ImageIO.read(getClass().getResource("/Funny-icons/blackBishop.png"));
+//			pieceIcons[1][4] = ImageIO.read(getClass().getResource("/Funny-icons/blackRook.png"));
+//			pieceIcons[1][5] = ImageIO.read(getClass().getResource("/Funny-icons/blackQueen.png"));
+			pieceIcons[1][0] = ImageIO.read(getClass().getResource("/Styled-icons/BlackPawnStyled.png"));
+			pieceIcons[1][1] = ImageIO.read(getClass().getResource("/Styled-icons/BlackKingStyled.png"));
+			pieceIcons[1][2] = ImageIO.read(getClass().getResource("/Styled-icons/BlackKnightStyled.png"));
+			pieceIcons[1][3] = ImageIO.read(getClass().getResource("/Styled-icons/BlackBishopStyled.png"));
+			pieceIcons[1][4] = ImageIO.read(getClass().getResource("/Styled-icons/BlackRookStyled.png"));
+			pieceIcons[1][5] = ImageIO.read(getClass().getResource("/Styled-icons/BlackQueenStyled.png"));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -144,7 +157,7 @@ public class gui extends JFrame {
 					@Override
 					public void mouseExited(MouseEvent e) {
 						// un-highlight the square after exiting if no square selected
-						if(!squareSelected) {
+						if(!squareSelected && !gameHalt) {
 							for(int i = hovered.size() - 1; i >= 0; i--) {
 								hovered.get(i).setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
 							}
@@ -155,7 +168,7 @@ public class gui extends JFrame {
 					@Override
 					public void mouseEntered(MouseEvent e) {
 						// if no square selected, then highlight the square
-						if(!squareSelected) {
+						if(!squareSelected && !gameHalt) {
 							JButton c = (JButton)(e.getComponent());
 							hovered.add(c);
 							c.setBorder(BorderFactory.createLineBorder(Color.RED, 3));
@@ -164,26 +177,27 @@ public class gui extends JFrame {
 					
 					@Override
 					public void mouseClicked(MouseEvent e) {
-						// get clicked button
-						JButton square = (JButton)(e.getComponent());
-						// remove previously highlighted squares
-						// take note if the same button was selected. Treat as a de-select
-						boolean sameButton = square.getLocation().equals(lastP) && !sameSelectedBuffer;
-						boolean move = !sameButton && validSquares.contains(square);
-						sameSelectedBuffer = sameButton;
-						// toggle clicked
-						squareSelected = !sameButton && !move;
-						for(JButton jb : validSquares) {
-							jb.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
+						if(!gameHalt) {
+							// get clicked button
+							JButton square = (JButton)(e.getComponent());
+							// remove previously highlighted squares
+							// take note if the same button was selected. Treat as a de-select
+							boolean sameButton = square.getLocation().equals(lastP) && !sameSelectedBuffer;
+							boolean move = !sameButton && validSquares.contains(square);
+							sameSelectedBuffer = sameButton;
+							// toggle clicked
+							squareSelected = !sameButton && !move;
+							for(JButton jb : validSquares) {
+								jb.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
+							}
+							validSquares.clear();
+							if(move) { // perform a move
+								moveSquare(square, b);
+							} else if (!sameButton) { // if new button selected then find valid moves
+								selectSquare(square, b);
+								lastP = square.getLocation();
+							}
 						}
-						validSquares.clear();
-						if(move) { // perform a move
-							moveSquare(square, b);
-						} else if (!sameButton) { // if new button selected then find valid moves
-							selectSquare(square, b);
-							lastP = square.getLocation();
-						}
-						// System.out.println(b);
 					}
 				});
         	}
@@ -256,22 +270,22 @@ public class gui extends JFrame {
 	private Image getImage(Board b, int j, int i) {
 		Image img;
 	    switch(b.getPiece(j, i).getType()) {
-	    	case "P": 
+	    	case 'P': 
 	    		img = b.getPiece(j, i).isWhite() ? pieceIcons[0][0] : pieceIcons[1][0];
 	    		break;
-	    	case "K":
+	    	case 'K':
 	    		img = b.getPiece(j, i).isWhite() ? pieceIcons[0][1] : pieceIcons[1][1];
 	    		break;
-	    	case "N":
+	    	case 'N':
 	    		img = b.getPiece(j, i).isWhite() ? pieceIcons[0][2] : pieceIcons[1][2];
 	    		break;
-	    	case "B":
+	    	case 'B':
 	    		img = b.getPiece(j, i).isWhite() ? pieceIcons[0][3] : pieceIcons[1][3];
 	    		break;
-	    	case "R":
+	    	case 'R':
 	    		img = b.getPiece(j, i).isWhite() ? pieceIcons[0][4] : pieceIcons[1][4];
 	    		break;
-	    	case "Q":
+	    	case 'Q':
 	    		img = b.getPiece(j, i).isWhite() ? pieceIcons[0][5] : pieceIcons[1][5];
 	    		break;
 	    	default: 
@@ -296,6 +310,53 @@ public class gui extends JFrame {
         };
         toolBar.add(newGameButton);
 		toolBar.add(new JButton("Resign"));
+		toolBar.addSeparator();
+		Action undoButton = new AbstractAction("Undo") {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				b.undoMove();
+				initializeBoard(b);
+				turnCounter.setText(b.getTurn() + " turn");
+				boolean movesAvailable = b.generateAllMoves();
+				// no more moves, either a stalemate or checkmate
+				if(!movesAvailable) {
+					gameHalt = true;
+					String winner = b.getTurn().equals("W") ? "B" : "W";
+					gameText.setText("Game over. " +  winner + " wins!");
+				} else {
+					gameHalt = false;
+					gameText.setText("Welcome to my chess game.");
+
+				}
+			}
+		};
+		toolBar.add(undoButton);
+		Action redoButton = new AbstractAction("Redo") {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				b.redoMove();
+				initializeBoard(b);
+				turnCounter.setText(b.getTurn() + " turn");
+				boolean movesAvailable = b.generateAllMoves();
+				// no more moves, either a stalemate or checkmate
+				if(!movesAvailable) {
+					gameHalt = true;
+					String winner = b.getTurn().equals("W") ? "B" : "W";
+					gameText.setText("Game over. " +  winner + " wins!");
+				} else {
+					gameHalt = false;
+					gameText.setText("Welcome to my chess game.");
+
+				}
+			}
+		};
+		toolBar.add(redoButton);
+		toolBar.addSeparator();
+		gameText = new JLabel("Welcome to my chess game.");
+		toolBar.add(gameText);
+		
 	}
 	
 	/**
@@ -318,6 +379,7 @@ public class gui extends JFrame {
 		validSquares.clear();
 		squareSelected = false;
 		sameSelectedBuffer = false;
+		gameHalt = false;
 		lastP = null;
 		
 	}
@@ -327,16 +389,18 @@ public class gui extends JFrame {
 	 * @param b Board of square buttons
 	 */
 	private void selectSquare(JButton square, Board b) {
-		square.setBorder(BorderFactory.createLineBorder(Color.GREEN, 3));
-		// get location of clicked square
-		Point p = square.getLocation();
-		validSquares.add(square);
-		// find valid moves
-		List<int[]> moves = b.getMoves(p.getY(), p.getX());
-		for(int[] m : moves) {
-			// System.out.println(m[0] + " " + m[1]);
-			validSquares.add(boardSquares[m[1]][m[0]]);
-			boardSquares[m[1]][m[0]].setBorder(BorderFactory.createLineBorder(Color.YELLOW, 3));
+		if(!gameHalt) {
+			square.setBorder(BorderFactory.createLineBorder(Color.GREEN, 3));
+			// get location of clicked square
+			Point p = square.getLocation();
+			validSquares.add(square);
+			// find valid moves
+			List<int[]> moves = b.getMoves(p.getY(), p.getX());
+			for(int[] m : moves) {
+				// System.out.println(m[0] + " " + m[1]);
+				validSquares.add(boardSquares[m[1]][m[0]]);
+				boardSquares[m[1]][m[0]].setBorder(BorderFactory.createLineBorder(Color.YELLOW, 3));
+			}
 		}
 	}
 	
@@ -346,32 +410,44 @@ public class gui extends JFrame {
 	 * @param b board with all the square buttons
 	 */
 	private void moveSquare(JButton target, Board b) {
-		// gets location of last selected and target location
-		Point tp = target.getLocation();
-		int[] prevPo = b.getPosition(lastP.getX(), lastP.getY());
-		int[] targPo = b.getPosition(tp.getX(), tp.getY());
+		if(!gameHalt) {
+			// gets location of last selected and target location
+			Point tp = target.getLocation();
+			int[] prevPo = b.getPosition(lastP.getX(), lastP.getY());
+			int[] targPo = b.getPosition(tp.getX(), tp.getY());
 
-		if(b.getPiece(prevPo[1], prevPo[0]).isKing() && Math.abs(prevPo[0] - targPo[0]) > 1) {
-			moveCastlingRook(b, prevPo, targPo);
+			if(b.getPiece(prevPo[1], prevPo[0]).isKing() && Math.abs(prevPo[0] - targPo[0]) > 1) {
+				moveCastlingRook(b, prevPo, targPo);
+			}
+			// if enpassant occurred remove the captured pieces icon * it's a special case
+			if(b.enPassantOccurred(b, prevPo, targPo)) { 
+				boardSquares[targPo[0]][prevPo[1]].setIcon(null);
+			}
+			// move the piece on the functional board
+			b.move(prevPo, targPo);
+			
+			// update the gui to display the text based on the updates in the functional board
+			boardSquares[targPo[0]][targPo[1]].setIcon(boardSquares[prevPo[0]][prevPo[1]].getIcon());
+			boardSquares[prevPo[0]][prevPo[1]].setIcon(null); 
+			
+			boolean movesAvailable = b.generateAllMoves();
+			// no more moves, either a stalemate or checkmate
+			if(!movesAvailable || b.promotionOccurred(b, targPo)) {
+				gameHalt = true;
+				String winner = b.getTurn().equals("W") ? "B" : "W";
+				gameText.setText("Game over. " +  winner + " wins!");
+			}
+			System.out.println(b);
+			turnCounter.setText((b.getTurn() + " turn"));	
 		}
-		// if enpassant occurred remove the captured pieces icon * it's a special case
-		if(b.enPassantOccurred(b, prevPo, targPo)) { 
-			int colChange = prevPo[0] > targPo[0] ? -1 : 1;
-			boardSquares[prevPo[1]][prevPo[0] + colChange].setIcon(null);
-		}
-		// move the piece on the functional board
-		b.move(prevPo, targPo);
-		
-		// update the gui to display the text based on the updates in the functional board
-		// boardSquares[targPo[0]][targPo[1]].setText(boardSquares[prevPo[0]][prevPo[1]].getText());
-		boardSquares[targPo[0]][targPo[1]].setIcon(boardSquares[prevPo[0]][prevPo[1]].getIcon());
-		boardSquares[prevPo[0]][prevPo[1]].setIcon(null); 
-		
-		b.changeTurn();
-		turnCounter.setText((b.getTurn() + " turn"));	
 	}
 	
-	
+	/**
+	 * Castle a rook. Under the assumption that the squares of safe
+	 * @param b functional board
+	 * @param prevPo previous rook position
+	 * @param targPo target rook position
+	 */
 	private void moveCastlingRook(Board b, int[] prevPo, int[] targPo) {
 		// if castling, the king will move more than one square, move the rook as well
 		int[] rookPrevPo = new int[2];

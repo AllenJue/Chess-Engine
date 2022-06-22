@@ -26,7 +26,6 @@ public class King extends Piece {
 	public King(int pType, int row, int col) {
 		super(pType, row, col);
 		castlingRights = true;
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -35,9 +34,18 @@ public class King extends Piece {
 	 */
 	public King(Piece p) {
 		super(p);
-		// TODO Auto-generated constructor stub
 	}
 
+	/**
+	 * Constructor for a specific type at row and col
+	 * @param pType
+	 * @param row
+	 * @param col
+	 */
+	public King(char pType, int row, int col) {
+		super(pType, row, col);
+	}
+	
 	/**
 	 * Gets the valid moveset for a King. Looks diagonally in four directions 
 	 * and laterally in four directions
@@ -119,7 +127,7 @@ public class King extends Piece {
 		while(b.inBounds(row, col) && b.isEmpty(row, col) && b.isSafe(color, row, col)) {
 			col += colChange;
 		}
-		System.out.println("Clear path to rook: " + (b.inBounds(row, col) && (col == 0 || col == 7)));
+		// System.out.println("Clear path to rook: " + (b.inBounds(row, col) && (col == 0 || col == 7)));
 		return b.inBounds(row, col) && (col == 0 || col == 7);
 	}
 	/**
@@ -139,10 +147,11 @@ public class King extends Piece {
 	}
 	
 	/**
-	 * Sets castling rights to false
+	 * Sets castling rights to change
+	 * @param updated castling rights
 	 */
-	public void removeCastlingRights() {
-		castlingRights = false;
+	public void setCastlingRights(boolean change) {
+		castlingRights = change;
 	}
 	
 	/**

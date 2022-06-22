@@ -25,6 +25,16 @@ public class Knight extends Piece {
 	public Knight(Piece p) {
 		super(p);
 	}
+	
+	/**
+	 * Constructor for a specific type at row and col
+	 * @param pType
+	 * @param row
+	 * @param col
+	 */
+	public Knight(char pType, int row, int col) {
+		super(pType, row, col);
+	}
 
 	/**
 	 * Get moves for a knight. Need to get the L shape, which is essentially moving in the lateral directions
