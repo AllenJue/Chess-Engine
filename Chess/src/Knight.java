@@ -45,8 +45,7 @@ public class Knight extends Piece {
 	 * @param j current piece column
 	 */
 	@Override
-	public List<int[]> getMoves(Board b, Piece p, int i, int j) {
-		List<int[]> moves = new ArrayList<>();
+	public List<int[]> getMoves(Board b, List<int[]> moves, Piece p, int i, int j) {
 		if(correctTurn(b) ) {
 			for(int k = 0; k < LATERAL_DIR.length - 1; k++) {
 				getDirMoves(b, moves, p, i + (LATERAL_DIR[k] + LATERAL_DIR[k + 1]) * 2, j - 1);
@@ -71,5 +70,14 @@ public class Knight extends Piece {
 				&& b.kingSafeWithMove(p.isWhite(), p.getRow(), p.getCol(), rowChange, colChange)) {
 			moves.add(new int[] {rowChange, colChange});
 		}
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Knight) {
+			Knight p = (Knight)obj;
+			return p.getInitialR() == this.getInitialR() && p.getInitialC() == this.getInitialC();
+		}
+		return false;
 	}
 }

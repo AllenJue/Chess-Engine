@@ -55,8 +55,7 @@ public class King extends Piece {
 	 * @param j column of p
 	 */
 	@Override
-	public List<int[]> getMoves(Board b, Piece p, int i, int j) {
-		List<int[]> moves = new ArrayList<>();
+	public List<int[]> getMoves(Board b, List<int[]> moves, Piece p, int i, int j) {
 		if(correctTurn(b)) {
 			for(int k = 0; k < LATERAL_DIR.length - 1; k++) {
 				getDirMoves(b, moves, p, i + LATERAL_DIR[k], j + LATERAL_DIR[k + 1]);
@@ -160,5 +159,14 @@ public class King extends Piece {
 	 */
 	public boolean getCastlingRights() {
 		return castlingRights;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof King) {
+			King p = (King)obj;
+			return p.getInitialR() == this.getInitialR() && p.getInitialC() == this.getInitialC();
+		}
+		return false;
 	}
 }

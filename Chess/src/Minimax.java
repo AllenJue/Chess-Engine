@@ -1,7 +1,10 @@
+import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.List;
 
 public class Minimax {
+	private int errors = 0 ;
 	Board b;
 	private final double[][] pawnValues = {
 		{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
@@ -69,8 +72,39 @@ public class Minimax {
 		{1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0}
 	};
 	
+	/**
+	 * Pair class to get the moves and evaluation in a single object
+	 *
+	 * @param <F> first val to be stored in the tuple
+	 * @param <S> second val to be stored in the tuple
+	 * @param <T> third val to be stored in the tuple
+	 */
+	public static class Tuple<F, S, T> {
+		private final F first;
+		private final S second;
+		private final T third;
+		
+		public Tuple(F f, S s, T t) {
+			this.first = f;
+			this.second = s;
+			this.third = t;
+		}
+		
+		public F getFirst() {
+			return first;
+		}
+		
+		public S getSecond() {
+			return second;
+		}
+		
+		public T getThird() {
+			return third;
+		}
+	}
+	
 	public Minimax(Board bCopy) {
-		b = new Board(bCopy);
+		b = bCopy;
 		
 	}
 	
@@ -84,37 +118,59 @@ public class Minimax {
 	 * @param whiteTurn true if it is white's turn to move
 	 * @return optimal move for the maximizing or minimizing player
 	 */
-	public double minimax(Board b, int depth, double alpha, double beta, boolean whiteTurn) {
-		if(depth == 0 || !b.generateAllMoves()) {
+	public double minimax(int depth, double alpha, double beta, boolean whiteTurn) {
+		if(!b.movesAvailable()) {
+			return b.whiteTurn() ? -999 : 999;
+		} else if(depth == 0) {
 			return evaluatePosition();
 		}
-		// maximize score if white turn 
+		double compEval;
 		if(whiteTurn) {
-			double maxEval = Double.MIN_VALUE;
-			 for(Piece p : b.getPieceList(true).keySet()) {
-				 // TODO: do move
-				 double eval = minimax(b, depth - 1, alpha, beta, !whiteTurn);
-				 // TODO: undo move
-				 maxEval = Math.max(maxEval, eval);
-				 alpha = Math.max(alpha, maxEval);
-				 if(beta <= alpha) {
-					 break;
-				 }
-			 }
-			 return maxEval;
+			compEval = Double.MIN_VALUE;
 		} else {
-			// minimize score if black turn
-			double minEval = Double.MAX_VALUE;
-			 for(Piece p : b.getPieceList(true).keySet()) {
-				 double eval = minimax(b, depth - 1, alpha, beta, !whiteTurn);
-				 minEval = Math.min(minEval, eval);
-				 beta = Math.min(minEval, minEval);
-				 if(beta <= alpha) {
-					 break;
-				 }
-			 }
-			 return minEval;
+			compEval = Double.MAX_VALUE;
 		}
+		// maximize score if white turn 
+		HashMap<Piece, List<int[]>> pieceListCopy = deepCopy(b.getPieceList(whiteTurn)); // Need to make a DEEP COPY FIX!!!		
+		for(Piece p : pieceListCopy.keySet()) {
+			 // try moving piece
+			int[] prevPo = new int[] {p.getCol(), p.getRow()};
+			for(int[] moves : pieceListCopy.get(p)) {
+				if(!p.isCaptured()) {
+					int[] targPo = new int[] {moves[1], moves[0]};
+					// make move
+					b.move(prevPo, targPo);
+					double eval = minimax(depth - 1, alpha, beta, !whiteTurn);
+					b.undoMove();
+					if(whiteTurn) {
+						compEval = Math.max(compEval, eval);
+						alpha = Math.max(alpha, eval);
+					} else {
+						compEval = Math.min(compEval, eval);
+						beta = Math.min(beta, eval);
+					}
+					if(beta <= alpha) {
+						break;
+					}
+				}
+			}
+			if(beta <= alpha) {
+				break;
+			}
+		}
+		return compEval;
+	}
+	
+	public HashMap<Piece, List<int[]>> deepCopy(HashMap<Piece, List<int[]>> copy) {
+		HashMap<Piece, List<int[]>> deepCopy = new HashMap<>();
+		for(Piece p : copy.keySet()) {
+			List<int[]> copyList = new ArrayList<>();
+			for(int[] move : copy.get(p)) {
+				copyList.add(new int[] {move[0], move[1]});
+			}
+			deepCopy.put(p, copyList);
+		}
+		return deepCopy;
 	}
 	
 	/**
@@ -126,11 +182,15 @@ public class Minimax {
 		HashMap<Piece, List<int[]>> whitePieces = b.getPieceList(true);
 		for(Piece p : whitePieces.keySet()) {
 			// add to position score for white pieces
-			score += getPieceValue(p);
+			if(!p.isCaptured()) {
+				score += getPieceValue(p);
+			}
 		}
 		HashMap<Piece, List<int[]>> blackPieces = b.getPieceList(false);
 		for(Piece p : blackPieces.keySet()) {
-			score -= getPieceValue(p);
+			if(!p.isCaptured()) {
+				score -= getPieceValue(p);
+			}
 		}
 		return score;
 	}

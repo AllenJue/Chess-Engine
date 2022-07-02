@@ -29,6 +29,7 @@ public class Board {
 	private HashMap<Piece, List<int[]>> whitePieces;
 	private HashMap<Piece, List<int[]>> blackPieces;
 	// access to white and black king is essential, as all moves must ensure king safety
+	private boolean movesAvailable;
 	private Piece whiteKing;
 	private Piece blackKing;
 	private boolean whiteTurn;
@@ -38,7 +39,12 @@ public class Board {
 	// Stacks to implement command pattern for redo and undo
 	private ArrayDeque<String> undoFEN;
 	private ArrayDeque<String> redoFEN;
-
+	// Stacks to implement undo withoutFEN
+	private ArrayDeque<Piece> captured;
+	private ArrayDeque<Piece> lastMoved;
+	private ArrayDeque<int[]> previousPos;
+	private ArrayDeque<Boolean> prevCastle;
+	private final Piece NULL_PIECE = new Pawn(0, -1, -1);
 	
 	/**
 	 * Initialize empty board with pieces
@@ -46,7 +52,7 @@ public class Board {
 	public Board() {
 		initializeFields();
 		initializeBoard();
-		generateAllMoves();
+		movesAvailable = generateAllMoves();
 	}
 
 	/**
@@ -61,11 +67,22 @@ public class Board {
 		whitePieces = new HashMap<>(b.whitePieces);
 		undoFEN = new ArrayDeque<>(b.undoFEN);
 		redoFEN = new ArrayDeque<>(b.redoFEN);
+		captured = new ArrayDeque<>(b.captured);
+		lastMoved = new ArrayDeque<>(b.lastMoved);
+		previousPos = new ArrayDeque<>(b.previousPos);
+		prevCastle = new ArrayDeque<>(b.prevCastle);
+		movesAvailable = b.movesAvailable;
 		for(Piece p : blackPieces.keySet()) {
 			board[p.getRow()][p.getCol()] = createPiece(p);
+			if(p.isKing()) {
+				blackKing = board[p.getRow()][p.getCol()];
+			}
 		}
 		for(Piece p : whitePieces.keySet()) {
 			board[p.getRow()][p.getCol()] = createPiece(p);
+			if(p.isKing()) {
+				whiteKing = board[p.getRow()][p.getCol()];
+			}
 		}
 		generateAllMoves();
 	}
@@ -106,13 +123,17 @@ public class Board {
 	 */
 	private void initializeFields() {
 		board = new Piece[8][8];
-		ply = 0;
+		ply = 1;
 		halfMoves = 0;
 		whiteTurn = true;
 		blackPieces = new HashMap<>();
 		whitePieces = new HashMap<>();
 		undoFEN = new ArrayDeque<>();
 		redoFEN = new ArrayDeque<>();
+		previousPos = new ArrayDeque<>();
+		lastMoved = new ArrayDeque<>();
+		captured = new ArrayDeque<>();
+		prevCastle = new ArrayDeque<>();
 	}
 	
 	/**
@@ -140,7 +161,6 @@ public class Board {
 	private void assignEnPassant(String enPassantSquare) {
 		if(!enPassantSquare.equals("-")) {
 			int[] pos = processNotation(enPassantSquare);
-			System.out.println(pos[0] + " " + pos[1]);
 			if(whiteTurn) {
 				board[pos[0] + 1][pos[1]].setPly(this.getPly());;
 			} else {
@@ -189,7 +209,7 @@ public class Board {
 			temp.add(c);
 		}
 		FenCanCastle(temp, whiteKing, 'K', 'Q');
-		FenCanCastle(temp, blackKing, 'q', 'k');
+		FenCanCastle(temp, blackKing, 'k', 'q');
 	}
 	
 	/**
@@ -270,9 +290,17 @@ public class Board {
 		HashMap<Piece, List<int[]>> colorPieces = whiteTurn ? whitePieces : blackPieces;
 		int size = 0;
 		for(Piece p : colorPieces.keySet()) {
-			List<int[]> moves = p.getMoves(this, p, p.getRow(), p.getCol());
-			size += moves.size();
-			colorPieces.put(p, moves);
+			if(!p.isCaptured()) {
+				try {
+					List<int[]> moves = colorPieces.get(p);
+					moves.clear();
+					p.getMoves(this, moves, p, p.getRow(), p.getCol());
+					size += moves.size();
+				} catch (NullPointerException e) {
+					System.out.println("Error trying to get: " + p + " from: " + colorPieces);
+				}
+		
+			}
 		}
 		return size > 0;
 	}
@@ -316,7 +344,11 @@ public class Board {
 				if(p == null) {
 					sb.append(' ');
 				} else {
-					sb.append(p.getType());
+					if(p.isWhite()) {
+						sb.append(p.getType());
+					} else {
+						sb.append(Character.toLowerCase(p.getType()));
+					}
 				}
 				sb.append('|');
 			}
@@ -420,15 +452,14 @@ public class Board {
 		if(!knightSafeWithMove(color, i, j, movedToI, movedToJ) || !pawnSafeWithMove(color, i, j, movedToI, movedToJ)) {
 			return false;
 		}
+		int[] enPassant; 
+		// if pawn is moving like enpassant should ignore its captured piece as well
+		if(!isEmpty(movedFromI, movedFromJ) && getPiece(movedFromI, movedFromJ).isPawn() && movedFromJ != movedToJ && isEmpty(movedToI, movedToJ)) {
+			enPassant = new int[] {movedFromI, movedToJ};
+		} else {
+			enPassant = new int[] {-1, -1};
+		}
 		for(int k = 0; k < LATERAL_DIR.length - 1; k++) {
-			int[] enPassant; 
-			// if pawn is moving like enpassant should ignore its captured piece as well
-			if(getPiece(movedFromI, movedFromJ).isPawn() && movedFromJ != movedToJ && isEmpty(movedToI, movedToJ)) {
-				enPassant = new int[] {movedFromI, movedToJ};
-			} else {
-				enPassant = new int[] {-1, -1};
-			}
-					
 			if(!lineIsSafeWithMove(color, i, j, LATERAL_DIR[k], LATERAL_DIR[k + 1],
 					movedFromI, movedFromJ, movedToI, movedToJ, enPassant)
 					|| !lineIsSafeWithMove(color, i, j, DIAGONAL_DIR[k], DIAGONAL_DIR[k + 1],
@@ -503,8 +534,8 @@ public class Board {
 		// return false (line is not safe) if encountering a bishop, rook, or queen in the same line
 		if(inBounds(row, col) && !(row == movedToI && col == movedToJ) && getPiece(row, col).isWhite() != color) {
 			Piece targetPiece = this.getPiece(row, col);
-			if(((row == i || col == j) && (targetPiece.isQueen() || targetPiece.isRook()))
-					|| (((row + col == i + j) || (row - col == i - j)) && (targetPiece.isQueen() || targetPiece.isBishop()))) {
+			if(((row == i || col == j) && (targetPiece.isQueen() || targetPiece.isRook() || targetPiece.isPromoted()))
+					|| (((row + col == i + j) || (row - col == i - j)) && (targetPiece.isQueen() || targetPiece.isBishop() || targetPiece.isPromoted()))) {
 				return false;
 			}
 		}
@@ -534,8 +565,8 @@ public class Board {
 		// knight targeted square
 		if(inBounds(row, col) && getPiece(row, col).isWhite() != color) {
 			Piece targetPiece = this.getPiece(row, col);
-			if(((row == i || col == j) && (targetPiece.isQueen() || targetPiece.isRook()))
-					|| (((row + col == i + j) || (row - col == i - j)) && (targetPiece.isQueen() || targetPiece.isBishop()))) {
+			if(((row == i || col == j) && (targetPiece.isQueen() || targetPiece.isRook() || targetPiece.isPromoted()))
+					|| (((row + col == i + j) || (row - col == i - j)) && (targetPiece.isQueen() || targetPiece.isBishop() || targetPiece.isPromoted()))) {
 				return false;
 			}
 		}
@@ -661,28 +692,63 @@ public class Board {
 	 * @param targPo target position
 	 */
 	public void move(int[] prevPo, int[] targPo) {
+		if(board[prevPo[1]][prevPo[0]].isWhite() != whiteTurn) {
+			throw new IllegalArgumentException("Moving on the wrong turn: " + board[prevPo[1]][prevPo[0]]
+					+ " \n" + whitePieces + " \n" + blackPieces + " \n trying to move: " + prevPo[1] + " " + prevPo[0]
+							+ " to " + targPo[1] + " " + targPo[0] + "\n board state: \n" + this);
+		}
 		// kill a piece by removng it from the list of pieces (includes en passant captures)
 		capturePieceMap(prevPo, targPo);
 		// move the piece
+		if(getPiece(prevPo[1], prevPo[0]).isKing() && Math.abs(prevPo[0] - targPo[0]) > 1) {
+			moveCastlingRook(targPo);
+		}
 		movePieceMap(prevPo, targPo);
 		// if the piece is a king, keep track of where it should go
 		trackKing(targPo);
 		checkEnPassant(prevPo, targPo);
 		// remove castling rights (if any) from the piece that just moved and change location
-		board[targPo[1]][targPo[0]].setLocations(targPo[1], targPo[0]);
-		board[targPo[1]][targPo[0]].setCastlingRights(false);
 		ply++;
 		changeTurn();
+		movesAvailable = generateAllMoves();
 		redoFEN.clear();
 		undoFEN.offer(generateFEN());
-		System.out.println(undoFEN);
+		previousPos.offer(prevPo);
+		lastMoved.offer(board[targPo[1]][targPo[0]]);
+	}
+
+	/**
+	 * Moves the rook correctly if a castle has occurred
+	 * @param prevPo previous position of king
+	 * @param targPo target position of king
+	 */
+	private void moveCastlingRook(int[] targPo) {
+		// kingside castle
+		if(targPo[0] == 6) {
+			board[targPo[1]][5] = board[targPo[1]][7]; 
+			board[targPo[1]][5].setLocations(targPo[1], 5); 
+			board[targPo[1]][7] = null; 
+		} else {
+			board[targPo[1]][3] = board[targPo[1]][0]; 
+			board[targPo[1]][3].setLocations(targPo[1], 3); 
+			board[targPo[1]][0] = null;
+		}
 	}
 
 	/**
 	 * Remove a piece from the board by setting its value to null
+	 * @param kill the piece at killSquare
 	 */
 	private void kill(int[] killSquare) {
-		board[killSquare[0]][killSquare[1]] = null;
+		captured.offer(board[killSquare[1]][killSquare[0]]);
+		HashMap<Piece, List<int[]>> otherPieces = whiteTurn ? blackPieces : whitePieces;
+		for(Piece p : otherPieces.keySet()) {
+			if(board[killSquare[1]][killSquare[0]].equals(p)) {
+				p.capture();
+			}
+		}
+		board[killSquare[1]][killSquare[0]].capture();
+		board[killSquare[1]][killSquare[0]] = null;
 	}
 	
 	/**
@@ -692,16 +758,15 @@ public class Board {
 	 * @param targPo target position of piece
 	 */
 	private void capturePieceMap(int[] prevPo, int[] targPo) {
-		HashMap<Piece, List<int[]>> colorPieces = whiteTurn ? blackPieces : whitePieces;
-		// kill a piece by removng it from the list of pieces -- remove the piece from the OPPOSITE piece map
+		// kill a piece by pseudo-removing it from the list of pieces -- remove the piece from the OPPOSITE piece map
 		if(board[targPo[1]][targPo[0]] != null) {
-			colorPieces.remove(board[targPo[1]][targPo[0]]);
-		} 
-		if(enPassantOccurred(this, prevPo, targPo)) {
+			kill(targPo);
+		} else if(enPassantOccurred(this, prevPo, targPo)) {
 			// if the target square is less than the current square column, 
-			// cacptured piece is on the left
-			colorPieces.remove(board[prevPo[1]][targPo[0]]);
-			kill(new int[] {prevPo[1], targPo[0]});
+			// captured piece is on the left
+			kill(new int[] {targPo[0], prevPo[1]});
+		} else {
+			captured.offer(NULL_PIECE);
 		}
 	}
 	
@@ -713,11 +778,29 @@ public class Board {
 	 * @param targPo target position of moving piece
 	 */
 	private void movePieceMap(int[] prevPo, int[] targPo) {
+		board[targPo[1]][targPo[0]] = board[prevPo[1]][prevPo[0]];
+		board[targPo[1]][targPo[0]].setLocations(targPo[1], targPo[0]);
+		prevCastle.offer(board[targPo[1]][targPo[0]].getCastlingRights());
+		board[targPo[1]][targPo[0]].setCastlingRights(false);
+		Piece p = board[targPo[1]][targPo[0]];
 		HashMap<Piece, List<int[]>> colorPieces = whiteTurn ? whitePieces : blackPieces;
-		colorPieces.remove(board[prevPo[1]][prevPo[0]]);
-		System.out.println(board[prevPo[1]][prevPo[0]]);
-		board[targPo[1]][targPo[0]] = createPiece(board[prevPo[1]][prevPo[0]]);
-		colorPieces.put(board[targPo[1]][targPo[0]], new ArrayList<>());
+		if(promotionOccurred(this, targPo)) {
+			p.automaticPromote(p.getRow(), p.getCol());
+			p.setPly(this);
+			for(Piece bp : colorPieces.keySet()) {
+				if(bp.equals(p)) {
+					bp.automaticPromote(p.getRow(), p.getCol());
+					bp.setPly(this);
+					break;
+				}
+			}
+		}
+		for(Piece bp : colorPieces.keySet()) {
+			if(bp.equals(p)) {
+				bp.setLocations(p.getRow(), p.getCol());
+				break;
+			}
+		}
 		board[prevPo[1]][prevPo[0]] = null;
 	}
 	
@@ -745,7 +828,7 @@ public class Board {
 		Piece p = board[targPo[1]][targPo[0]];
 		// if pawn moved two forward in the same column, mark its ply so its possible for en_passant captures
 		if(p.isPawn() && Math.abs(targPo[1] - prevPo[1]) > 1 && (targPo[0] == prevPo[0])) {
-			board[targPo[1]][targPo[0]].setPly(ply + 1);
+			board[targPo[1]][targPo[0]].setPly(ply);
 		}
 	}
 
@@ -757,8 +840,10 @@ public class Board {
 	 * @return true if an en passant has occurred
 	 */
 	public boolean enPassantOccurred(Board b, int[] prevPo, int[] targPo) {
-		return !b.isEmpty(prevPo[1], prevPo[0]) && board[prevPo[1]][prevPo[0]].isPawn() 
-				&& board[targPo[1]][targPo[0]] == null && prevPo[0] != targPo[0];
+		Piece potentialTarget = board[prevPo[1]][targPo[0]];
+		return board[prevPo[1]][prevPo[0]].isPawn() && prevPo[0] != targPo[0] && potentialTarget != null 
+				&& potentialTarget.getPly() == this.ply - 1
+				&& potentialTarget.isWhite() != board[prevPo[1]][prevPo[0]].isWhite();
 		// en_passant if pawn is moving diagonally to an empty square. need to remove the adjacent pawn
 	}
 	
@@ -778,7 +863,7 @@ public class Board {
 	 * Generates a FEN from a board position
 	 * @return a FEN string from the current board state
 	 */
-	private String generateFEN() {
+	public String generateFEN() {
 		Piece enPassant = null;
 		StringBuilder sb = new StringBuilder();
 		// append board position
@@ -798,7 +883,7 @@ public class Board {
 					if(!board[i][j].isWhite()) {
 						piece = Character.toLowerCase(piece);
 					}
-					if(board[i][j].isPawn() && (i == 3 || i == 4) &&board[i][j].getPly() == this.ply) {
+					if(board[i][j].isPawn() && (i == 3 || i == 4) && board[i][j].getPly() == this.ply) {
 						enPassant = board[i][j];
 					}
 					sb.append(piece);
@@ -824,7 +909,7 @@ public class Board {
 		sb.append(halfMoves);
 		sb.append(' ');
 		// fullmoves is the number of times black moves. This can be translated to the floor of (ply / 2) + 1
-		sb.append((ply / 2) + 1);
+		sb.append(((ply - 1) / 2) + 1);
 		return sb.toString();
 	}
 	
@@ -854,26 +939,26 @@ public class Board {
 	private void appendCastlingRights(StringBuilder sb) {
 		// if possible castling, find the castling rights, otherwise append '-'
 		if(whiteKing.getCastlingRights() || blackKing.getCastlingRights()) {
-			boolean wKingside = whiteKing.getCastlingRights();
-			boolean wQueenside = whiteKing.getCastlingRights();
-			boolean bKingside = whiteKing.getCastlingRights();
-			boolean bQueenside = blackKing.getCastlingRights();
+			boolean wKingside = false;
+			boolean wQueenside = false;
+			boolean bKingside = false;
+			boolean bQueenside = false;
 			for(Piece p : whitePieces.keySet()) {
 				if(p.isRook()) {
 					// get castling rights from the rooks if they're in the correct column
 					if(p.getCol() == 7) {
-						wKingside &= p.getCastlingRights();
+						wKingside = (whiteKing.getCastlingRights() && p.getCastlingRights());
 					} else if(p.getCol() == 0) {
-						wQueenside &= p.getCastlingRights();
+						wQueenside = (whiteKing.getCastlingRights() && p.getCastlingRights());
 					}
 				} 
 			}
 			for(Piece p : blackPieces.keySet()) {
 				if(p.isRook()) {
 					if(p.getCol() == 7) {
-						bKingside &= p.getCastlingRights();
+						bKingside = (blackKing.getCastlingRights() && p.getCastlingRights());
 					} else if(p.getCol() == 0) {
-						bQueenside &= p.getCastlingRights();
+						bQueenside = (blackKing.getCastlingRights() && p.getCastlingRights());
 					}
 				} 
 			}
@@ -896,24 +981,133 @@ public class Board {
 	}
 
 	/**
+	 * Undoes a singular move if possible
+	 */
+	public void undoMove() {
+		if(lastMoved.size() > 0) {
+			changeTurn();
+			ply--;
+			int[] prevPo = previousPos.removeLast();
+			Piece lastP = lastMoved.removeLast();
+			int[] targPo = new int[] {lastP.getCol(), lastP.getRow()};
+			boolean lastCastle = prevCastle.removeLast();
+			lastP.setCastlingRights(lastCastle);
+			// put last moved piece in previous position
+			board[prevPo[1]][prevPo[0]] = lastP;
+			// null out where it was
+			board[lastP.getRow()][lastP.getCol()] = null;
+			lastP.setLocations(prevPo[1], prevPo[0]);
+			// replace the captured piece
+			if(captured.peekLast() == NULL_PIECE) {
+				board[targPo[1]][targPo[0]] = null;
+				captured.removeLast();
+			} else {
+				Piece capturedP = captured.removeLast();
+				board[capturedP.getRow()][capturedP.getCol()] = capturedP;
+				HashMap<Piece, List<int[]>> otherColor = getPieceList(!whiteTurn);
+				for(Piece p : otherColor.keySet()) {
+					if(p.equals(capturedP)) {
+						p.uncapture();
+						break;
+					}					
+				}
+				capturedP.uncapture();
+			}
+			HashMap<Piece, List<int[]>> colorPieces = getPieceList(whiteTurn);
+			// track the king
+			trackKing(prevPo);
+			if(lastP.isKing() && Math.abs(prevPo[0] - targPo[0]) > 1) {
+				// castling occurred, undo rook move as well
+				unmoveCastlingRook(targPo);
+			}
+			// update board state
+			for(Piece p : colorPieces.keySet()) {
+				if(p.equals(lastP)) {
+					p.setLocations(prevPo[1], prevPo[0]);
+					p.setCastlingRights(lastCastle);
+					break;
+				}
+			}
+			// undo promotion
+			if(lastP.getPly() == this.getPly() && lastP.isPromoted()) {
+				automaticUndoPromote(lastP);
+			}
+		}
+	}
+	
+	/**
+	 * Automatically unpromotes a queen to a pawn
+	 * @param lastP pawn to be depromoted
+	 */
+	private void automaticUndoPromote(Piece lastP) {
+		lastP.depromote();
+		HashMap<Piece, List<int[]>> colorPieces = getPieceList(whiteTurn);
+		for(Piece p : colorPieces.keySet()) {
+			if(p.equals(lastP)) {
+				p.depromote();
+				break;
+			}
+		}
+	}
+
+	/**
+	 * umoves a castling rook. Reassigns correct positions // TODO properly undo castling rook amd King
+	 * @param prevPo
+	 */
+	private void unmoveCastlingRook(int[] prevPo) {
+		if(prevPo[0] == 6) {
+			board[prevPo[1]][7] = board[prevPo[1]][5];
+			board[prevPo[1]][7].setCastlingRights(true);
+			board[prevPo[1]][7].setLocations(prevPo[1], 7);
+			Piece p = board[prevPo[1]][7];
+			HashMap<Piece, List<int[]>> colorPieces = whiteTurn ? whitePieces : blackPieces;
+			for(Piece bp : colorPieces.keySet()) {
+				if(p.equals(bp)) {
+					bp.setLocations(prevPo[1], 7);
+					bp.setCastlingRights(true);
+					break;
+				}
+			}
+			board[prevPo[1]][5] = null;
+		} else {
+			board[prevPo[1]][0] = board[prevPo[1]][3];
+			board[prevPo[1]][0].setCastlingRights(true);
+			board[prevPo[1]][0].setLocations(prevPo[1], 0);
+			Piece p = board[prevPo[1]][0];
+			HashMap<Piece, List<int[]>> colorPieces = whiteTurn ? whitePieces : blackPieces;
+			for(Piece bp : colorPieces.keySet()) {
+				if(p.equals(bp)) {
+					bp.setLocations(prevPo[1], 0);
+					bp.setCastlingRights(true);
+					break;
+				}
+			}
+			board[prevPo[1]][3] = null;
+		}
+	}
+	
+	/**
+	 * Redoes a singular move if possible
+	 */
+	public void redoMove() {
+		
+	}
+	
+	/**
 	 * Undos a move by initializing the board with the previous FEN
 	 * Keeps a tab on the undid FEN by offering it to the redo Stack
 	 */
-	public void undoMove() {
+	public void undoMoveWithFEN() {
 		if(undoFEN.size() > 1) {
 			redoFEN.offer(undoFEN.removeLast());
-			System.out.println("REDO FEN: " + redoFEN);
-			System.out.println("UNDO FEN: " + undoFEN);
-			System.out.println("to be initialized as\n" + undoFEN.peekLast());
 			initializeWithFen(undoFEN.peekLast());
-			System.out.println(this);
 		}
 	}
 	
 	/**
 	 * Redoes a move based on the moves stored in redo Stack
 	 */
-	public void redoMove() {
+	public void redoMoveWithFEN() {
 		if(!redoFEN.isEmpty()) {
 			String redoPos = redoFEN.removeLast();
 			undoFEN.offer(redoPos);
@@ -926,7 +1120,7 @@ public class Board {
 	 * @param p piece to duplicate
 	 * @return a duplicate p with type p.getType()
 	 */
-	private Piece createPiece(Piece p) {
+	public Piece createPiece(Piece p) {
 		switch (p.getType()) {
 			case 'P': 
 				return new Pawn(p);
@@ -1001,6 +1195,25 @@ public class Board {
 			throw new IllegalArgumentException("Unexpected value: " + pType);
 		}
 	}
+	
+	/**
+	 * Sets a piece at position targPo to be specified type
+	 * @param targPo location to set piece
+	 * @param type of piece to be created
+	 */
+	public void setPiece(int[] targPo, char type) {
+		HashMap<Piece, List<int[]>> colorPieces;
+		if(!board[targPo[1]][targPo[0]].isWhite()) {
+			colorPieces = blackPieces;
+			type = Character.toLowerCase(type);
+		} else {
+			colorPieces = whitePieces;
+		}
+		colorPieces.remove(board[targPo[1]][targPo[0]]);
+		board[targPo[1]][targPo[0]] = createPiece(type, targPo[1], targPo[0]);
+		colorPieces.put(board[targPo[1]][targPo[0]], new ArrayList<>());
+	}
+	
 	/**
 	 * Toggles the turn of the game
 	 */
@@ -1008,12 +1221,77 @@ public class Board {
 		whiteTurn = !whiteTurn;
 	}
 	
+	public boolean whiteTurn() {
+		return whiteTurn;
+	}
 	
-	/**
+ 	/**
 	 * Gets the ply of the board
 	 * @return ply
 	 */
 	public int getPly() {
 		return ply;
+	}
+	
+	public ArrayDeque<String> getUndoFEN() {
+		return undoFEN;
+	}
+
+	/**
+	 * Gets if there are moves available for the current player's turn. If
+	 * moves available == 0, game is over
+	 * @return true if there are moves available for the current player
+	 */
+	public boolean movesAvailable() {
+		return movesAvailable;
+	}
+	
+	public void clearPieces() {
+		for(Piece p : blackPieces.keySet()) {
+			blackPieces.get(p).clear();
+		}
+		for(Piece p : whitePieces.keySet()) {
+			whitePieces.get(p).clear();
+		}
+	}
+	
+	public void countPieces() {
+		int counted = 0;
+		for(Piece[] row : board) { 
+			for(Piece  p : row) {
+				if(p != null && !p.isCaptured()) {
+					counted++;
+				}
+			}
+		}
+		int listCount = 0;
+		for(Piece p : whitePieces.keySet()) {
+			if(!p.isCaptured()) listCount++;
+		}
+		for(Piece p : blackPieces.keySet()) {
+			if(!p.isCaptured()) listCount++;
+		}
+		if(counted != listCount) {
+			System.out.println("Listcount: " + listCount + " not equal to: " + counted);
+		}
+	}
+	
+	public ArrayDeque<Piece> getCaptured() {
+		return captured;
+	}
+
+	public ArrayDeque<Piece> actualCaptured() {
+		ArrayDeque<Piece> ad = new ArrayDeque<>();
+		for(Piece p : blackPieces.keySet()) {
+			if(p.isCaptured()) {
+				ad.offer(p);
+			}
+		}
+		for(Piece p : whitePieces.keySet()) {
+			if(p.isCaptured()) {
+				ad.offer(p);
+			}
+		}
+		return ad;
 	}
 }

@@ -10,6 +10,9 @@ import java.util.List;
 public class Pawn extends Piece {
 	private int en_passant;
 	public static final int[] PAWN_DIR = new int[] {-1, 1};
+	private boolean promoted;
+	private Piece promotedPiece;
+	
 	/**
 	 * Constructor that creates a new pawn in the given row
 	 * @param pType
@@ -17,6 +20,8 @@ public class Pawn extends Piece {
 	 */
 	public Pawn(int pType, int row, int col) {
 		super(pType, row, col);
+		promoted = false;
+		promotedPiece = null;
 		en_passant = 0;
 	}
 
@@ -26,6 +31,8 @@ public class Pawn extends Piece {
 	 */
 	public Pawn(Piece p) {
 		super(p);
+		promoted = false;
+		promotedPiece = null;
 		en_passant = 0;
 	}
 	
@@ -37,6 +44,8 @@ public class Pawn extends Piece {
 	 */
 	public Pawn(char pType, int row, int col) {
 		super(pType, row, col);
+		promoted = false;
+		promotedPiece = null;
 	}
 	
 	/**
@@ -47,29 +56,32 @@ public class Pawn extends Piece {
 	 * @param j current column
 	 * @return a list of coordinates of the valid pawn moves
 	 */
-	public List<int[]> getMoves(Board b, Piece p, int i, int j) {
-		List<int[]> moves = new ArrayList<>();
+	public List<int[]> getMoves(Board b, List<int[]> moves, Piece p, int i, int j) {
 		if(correctTurn(b)) {
-			// pawns can move one square depending on their color
-			int forwardMove = p.isWhite() ? i - 1 : i + 1;
-			// if the pawn is on its first rank, it can move two squares ahead
-			int firstMove = p.isWhite() ? i - 2 : i + 2;
-			
-			// check if pawn is on it first rank and if moving two squares ahead is in bounds and not blocked
-			if((p.isWhite() && i == 6 || !p.isWhite() && i == 1) && b.inBounds(firstMove, j) && b.isEmpty(firstMove, j)
-					&& b.kingSafeWithMove(isWhite(), i, j, firstMove, j)) {
-				moves.add(new int[] {firstMove, j});
-			} 
-			
-			if(b.inBounds(forwardMove, j) && b.isEmpty(forwardMove, j)
-					&& b.kingSafeWithMove(isWhite(), i, j, forwardMove, j)) {
-				moves.add(new int[] {forwardMove, j});
+			if(promoted) {
+				promotedPiece.getMoves(b, moves, p, i, j);
+			} else {
+				// pawns can move one square depending on their color
+				int forwardMove = p.isWhite() ? i - 1 : i + 1;
+				// if the pawn is on its first rank, it can move two squares ahead
+				int firstMove = p.isWhite() ? i - 2 : i + 2;
+				
+				// check if pawn is on it first rank and if moving two squares ahead is in bounds and not blocked
+				if((p.isWhite() && i == 6 || !p.isWhite() && i == 1) && b.inBounds(firstMove, j)  
+						&& b.isEmpty(forwardMove, j) && b.isEmpty(firstMove, j)
+						&& b.kingSafeWithMove(isWhite(), p.getRow(), p.getCol(), firstMove, j)) {
+					moves.add(new int[] {firstMove, j});
+				} 
+				
+				if(b.inBounds(forwardMove, j) && b.isEmpty(forwardMove, j)
+						&& b.kingSafeWithMove(isWhite(), p.getRow(), p.getCol(), forwardMove, j)) {
+					moves.add(new int[] {forwardMove, j});
+				}
+				// for left and right capture, check if inbounds, !empty, is a piece of the opposite color
+				// and doesn't leave the king in check
+				addCaptures(b, p, moves, i, j, forwardMove);
+				addEnPassant(b, p , moves, i, j, forwardMove);
 			}
-			// for left and right capture, check if inbounds, !empty, is a piece of the opposite color
-			// and doesn't leave the king in check
-			addCaptures(b, p, moves, i, j, forwardMove);
-			addEnPassant(b, p , moves, i, j, forwardMove);
-			// check en-passant is valid
 		}
 		return moves;
 	}
@@ -82,8 +94,8 @@ public class Pawn extends Piece {
 			if(b.inBounds(i, colChange) && !b.isEmpty(i, colChange)) {
 				Piece target = b.getPiece(i, colChange);
 				if(target.isWhite() != p.isWhite() && target.isPawn() 
-						&& target.getPly() == b.getPly()
-						&& b.kingSafeWithMove(isWhite(), i, j, forwardMove, colChange)) {
+						&& target.getPly() == b.getPly() - 1
+						&& b.kingSafeWithMove(isWhite(), p.getRow(), p.getCol(), forwardMove, colChange)) {
 					int rowChange = p.isWhite() ? -1 : 1;
 					moves.add(new int[] {i + rowChange, colChange});
 				}
@@ -107,7 +119,7 @@ public class Pawn extends Piece {
 			if(b.inBounds(forwardMove, colChange) && !b.isEmpty(forwardMove, colChange)) {
 				Piece target = b.getPiece(forwardMove, colChange);
 				if(target.isWhite() != p.isWhite()
-						&& b.kingSafeWithMove(isWhite(), i, j, forwardMove, colChange)) { 
+						&& b.kingSafeWithMove(isWhite(), p.getRow(), p.getCol(), forwardMove, colChange)) { 
 					moves.add(new int[] {forwardMove, colChange});
 				}
 			}
@@ -135,5 +147,47 @@ public class Pawn extends Piece {
 	 */
 	public int getPly() {
 		return en_passant;
+	}
+	
+	/**
+	 * Gets the type of the piece 
+	 * @return 'Q' if it is promoted and 'P' is not promoted
+	 */
+	public char getType() {
+		return isPromoted() ? 'Q' : 'P';
+	}
+	
+	/**
+	 * Automatically promote a pawn to a queen. The piece will now be considered a Queen
+	 */
+	public void automaticPromote(int row, int col) {
+		promoted = true;
+		char pType = isWhite() ? 'Q' : 'q';
+		promotedPiece = new Queen(pType, row, col);
+	}
+	
+	/**
+	 * Gets if a pawn is promoted
+	 * @return this.promoted
+	 */
+	public boolean isPromoted() {
+		return promoted;
+	}
+	
+	/**
+	 * Unpromotes a pawn. Used when undoing a promotion move
+	 */
+	public void depromote() {
+		promoted = false;
+		promotedPiece = null;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Pawn) {
+			Pawn p = (Pawn)obj;
+			return p.getInitialR() == this.getInitialR() && p.getInitialC() == this.getInitialC();
+		}
+		return false;
 	}
 }

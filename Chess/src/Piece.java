@@ -15,7 +15,10 @@ public abstract class Piece {
 	public static final int[] LATERAL_DIR = new int[] {-1, 0 , 1, 0, -1};
 	private static final char[] classifier = new char[] {'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R', 'P'}; // King, queen, rook, bishop, knight pawn
 	private char type;
+	private boolean captured;
 	private boolean white;
+	private final int INITIAL_R;
+	private final int INITIAL_C;
 	private int r;
 	private int c;
 	
@@ -26,9 +29,12 @@ public abstract class Piece {
 	 * @param col column of piece
 	 */
 	public Piece(int pType, int row, int col) {
+		captured = false;
 		type = classifier[pType];
 		r = row;
 		c = col;
+		INITIAL_R = r;
+		INITIAL_C = c;
 		white = row >= 6;
 	}
 	
@@ -37,10 +43,13 @@ public abstract class Piece {
 	 * @param p Piece to be copied
 	 */
 	public Piece(Piece p) {
+		captured = p.captured;
 		type = p.type;
 		white = p.white;
 		r = p.r;
 		c = p.c;
+		INITIAL_R = p.INITIAL_R;
+		INITIAL_C = p.INITIAL_C;
 	}
 	
 	/**
@@ -50,8 +59,11 @@ public abstract class Piece {
 	 * @param col column of piece
 	 */
 	public Piece(char pType, int row, int col) {
+		captured = false;
 		r = row;
 		c = col;
+		INITIAL_R = r;
+		INITIAL_C = c;
 		white = Character.isUpperCase(pType);
 		type = Character.toUpperCase(pType);
 	}
@@ -64,10 +76,15 @@ public abstract class Piece {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append('[');
-		sb.append(type);
+		sb.append(getType());
 		sb.append(", ");
 		sb.append("color = ");
 		sb.append(this.getColor());
+		sb.append(", loc: ");
+		sb.append(r + " " + c);
+		sb.append(", captured: " + captured);
+		sb.append(", is promoted: " + isPromoted());
+		sb.append(", castling rights: " + getCastlingRights());
 		sb.append(']');
 		return sb.toString();
 	}
@@ -105,7 +122,7 @@ public abstract class Piece {
 	 * @param j starting position row
 	 * @return a list of valid coordinates to move to
 	 */
-	public abstract List<int[]> getMoves(Board b, Piece p, int i, int j);
+	public abstract List<int[]> getMoves(Board b, List<int[]> moves, Piece p, int i, int j);
 	
 	/**
 	 * Gets the valid moves along a specified direction given a piece and it position
@@ -127,7 +144,7 @@ public abstract class Piece {
 			col += colChange;
 		}
 		// if meeting an opposite color piece, valid move is to capture
-		if(b.inBounds(row, col) && !b.getPiece(row, col).getColor().equals(b.getPiece(i, j).getColor())
+		if(b.inBounds(row, col) && b.getPiece(row, col).isWhite() != b.getPiece(i, j).isWhite()
 				&& b.kingSafeWithMove(p.isWhite(), i, j, row, col)) {
 			moves.add(new int[] {row, col});
 		}
@@ -190,7 +207,7 @@ public abstract class Piece {
 	 * @return this.type == 'Q'
 	 */
 	public boolean isQueen() {
-		return this.type == 'Q';
+		return this.type == 'Q' || (this.type == 'P' && isPromoted());
 	}
 	
 	/**
@@ -198,7 +215,7 @@ public abstract class Piece {
 	 * @return this.type == 'P'
 	 */
 	public boolean isPawn() {
-		return this.type == 'P';
+		return this.type == 'P' && !isPromoted();
 	}
 	
 	/**
@@ -259,7 +276,81 @@ public abstract class Piece {
 		return this.c;
 	}
 	
+	/**
+	 * Changes the type of the piece. Used for promotion
+	 * @param pTpye new type for piece
+	 */
+	public void changeType(char pTpye) {
+		type = pTpye;
+	}
+	
+	/**
+	 * Gets the ply of the piece (when it was last moved)
+	 * @return the move that the piece was last moved
+	 */
 	public int getPly() {
 		return -1;
 	}
+	
+	/**
+	 * Gets if a piece is captured
+	 * @return this.captured
+	 */
+	public boolean isCaptured() {
+		return captured;
+	}
+	
+	public void capture() {
+		captured = true;
+	}
+	
+	public void uncapture() {
+		captured = false;
+	}
+	
+	/**
+	 * Promotes a piece automatically
+	 * @param row of promotion
+	 * @param col of promotion
+	 */
+	public void automaticPromote(int row, int col) {
+		// placeholder for pawn promotion
+	}
+	
+	/**
+	 * Gets if a piece is promoted
+	 * @return false for any piece that's not a pawn
+	 */
+	public boolean isPromoted() {
+		return false;
+	}
+	
+	/**
+	 * Depromotes a piece back into a pawn
+	 */
+	public void depromote() {
+		// placeholder for pawn depromotion
+	}
+	
+	@Override
+	public int hashCode() {
+		int code = 0;
+		code += white ? 11 : 10;
+		code *= 100;
+		code += INITIAL_R;
+		code *= 10;
+		code += INITIAL_C;
+		return code;
+	}
+	
+	public int getInitialR() {
+		return INITIAL_R;
+	}
+	
+	public int getInitialC() {
+		return INITIAL_C;
+	}
+	
+	@Override
+	public abstract boolean equals(Object obj);
 }

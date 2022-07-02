@@ -45,8 +45,7 @@ public class Queen extends Piece {
 	 * @param j column of p
 	 */
 	@Override
-	public List<int[]> getMoves(Board b, Piece p, int i, int j) {
-		List<int[]> moves = new ArrayList<>();
+	public List<int[]> getMoves(Board b, List<int[]> moves, Piece p, int i, int j) {
 		if(correctTurn(b)) {
 			for(int k = 0; k < DIAGONAL_DIR.length - 1; k++) {
 				getDirMoves(b, moves, p, DIAGONAL_DIR[k], DIAGONAL_DIR[k + 1], i, j);
@@ -56,4 +55,12 @@ public class Queen extends Piece {
 		return moves;
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Queen) {
+			Queen p = (Queen)obj;
+			return p.getInitialR() == this.getInitialR() && p.getInitialC() == this.getInitialC();
+		}
+		return false;
+	}
 }

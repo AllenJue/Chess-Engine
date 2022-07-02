@@ -43,8 +43,7 @@ public class Bishop extends Piece {
 	 * @param j current column
 	 * @return a list of coordinates of the valid bishop moves
 	 */
-	public List<int[]> getMoves (Board b, Piece p, int i, int j) {
-		List<int[]> moves = new ArrayList<>();
+	public List<int[]> getMoves (Board b, List<int[]> moves, Piece p, int i, int j) {
 		if(correctTurn(b)) {
 			// bishops can move diagonally until another piece to capture or the end of the board
 			for(int k = 0; k < DIAGONAL_DIR.length - 1; k++) {
@@ -52,5 +51,14 @@ public class Bishop extends Piece {
 			}
 		}
 		return moves;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Bishop) {
+			Bishop p = (Bishop)obj;
+			return p.getInitialR() == this.getInitialR() && p.getInitialC() == this.getInitialC();
+		}
+		return false;
 	}
 }
