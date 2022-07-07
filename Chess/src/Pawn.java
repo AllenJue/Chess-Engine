@@ -4,7 +4,6 @@
  * @author Allen Jue
  * 6/12/2022
  */
-import java.util.ArrayList;
 import java.util.List;
 
 public class Pawn extends Piece {

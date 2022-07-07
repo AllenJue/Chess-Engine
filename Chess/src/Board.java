@@ -1032,6 +1032,7 @@ public class Board {
 			if(lastP.getPly() == this.getPly() && lastP.isPromoted()) {
 				automaticUndoPromote(lastP);
 			}
+			movesAvailable = generateAllMoves();
 		}
 	}
 	

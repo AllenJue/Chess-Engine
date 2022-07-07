@@ -38,6 +38,7 @@ public class gui extends JFrame {
 	private JButton[][] boardSquares;
 		
 	// used for managing the gui
+	private JLabel evalText;
 	private JLabel gameText;
 	private JLabel turnCounter;
 	private List<JButton> hovered = new ArrayList<>();
@@ -98,7 +99,6 @@ public class gui extends JFrame {
         tools.setFloatable(false);
         mainGui.add(tools, BorderLayout.PAGE_START);
         initializeToolBar(tools, b);
-        
         // Create grid layout
 		board = new JPanel(new GridLayout(0, 9));
 		setContentPane(mainGui);
@@ -261,7 +261,7 @@ public class gui extends JFrame {
 						|| (i % 2 == 1 && j % 2 == 1)) {
 					button.setBackground(Color.WHITE);
 				} else {
-					button.setBackground(Color.BLACK);
+					button.setBackground(Color.DARK_GRAY);
 				}
 				if(b.getPiece(j, i) != null) {
 					try {
@@ -341,18 +341,11 @@ public class gui extends JFrame {
 				}
 				validSquares.clear();
 				turnCounter.setText(b.getTurn() + " turn");
-				boolean movesAvailable = b.generateAllMoves();
 				gameHalt = false;
 				// no more moves, either a stalemate or checkmate
-				if(!movesAvailable) {
-					gameOver = true;
-					String winner = b.whiteTurn()? "B" : "W";
-					gameText.setText("Game over. " +  winner + " wins!");
-				} else {
-					gameOver = false;
-					gameText.setText("Welcome to my chess game.");
-
-				}
+				gameOver = false;
+				gameText.setText("Welcome to my chess game.");
+				setEval(b);
 			}
 		};
 		toolBar.add(undoButton);
@@ -385,6 +378,9 @@ public class gui extends JFrame {
 		gameText = new JLabel("Welcome to my chess game.");
 		toolBar.add(gameText);
 		toolBar.addSeparator();
+		evalText = new JLabel(getEval(b));
+		toolBar.add(evalText);
+		toolBar.addSeparator();
 		promotionPanel = new JPanel();
 		initializePromotion();
 		toolBar.add(promotionPanel);
@@ -414,8 +410,10 @@ public class gui extends JFrame {
 		gameHalt = false;
 		gameOver = false;
 		lastP = null;
-		gameText.setText("Welcome to my chess game.");		
+		gameText.setText("Welcome to my chess game.");	
+		setEval(b);
 	}
+	
 	/**
 	 * Selects a square to be highlighted and displays its valid moves
 	 * @param square Selected square to have moves displayed
@@ -435,6 +433,28 @@ public class gui extends JFrame {
 				boardSquares[m[1]][m[0]].setBorder(BorderFactory.createLineBorder(Color.YELLOW, 3));
 			}
 		}
+	}
+	
+	/**
+	 * Gets the evaluation of the board
+	 * @param b functional board
+	 * @return the formatted evaluation of the board
+	 */
+	private String getEval(Board b) {
+		Minimax mm = new Minimax(b);
+		double eval = mm.minimax(4, Double.MIN_VALUE, Double.MAX_VALUE, b.whiteTurn());
+		System.out.printf("Eval: %.5f\n", eval);
+		b.clearPieces();
+		b.generateAllMoves();
+		return String.format("Evaluation: %.5f", eval);
+	}
+	
+	/**
+	 * Sets the evaluation text of the board
+	 * @param b functional board
+	 */
+	private void setEval(Board b) {
+		evalText.setText(getEval(b));
 	}
 	
 	/**
@@ -469,11 +489,8 @@ public class gui extends JFrame {
 				gameOver = true;
 				String winner = b.whiteTurn() ? "B" : "W";
 				gameText.setText("Game over. " +  winner + " wins!");
-			}
-			Minimax mm = new Minimax(b);
-			System.out.printf("Eval: %.5f\n", mm.minimax(4, Double.MIN_VALUE, Double.MAX_VALUE, b.whiteTurn()));
-			b.clearPieces();
-			b.generateAllMoves();
+			} 
+			setEval(functionalBoard);
 			turnCounter.setText((b.getTurn() + " turn"));	
 		}
 	}

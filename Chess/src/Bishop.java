@@ -4,7 +4,6 @@
  * 6/12/2022
  */
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Bishop extends Piece {

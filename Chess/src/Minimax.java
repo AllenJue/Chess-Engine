@@ -1,10 +1,8 @@
 import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.List;
 
 public class Minimax {
-	private int errors = 0 ;
 	Board b;
 	private final double[][] pawnValues = {
 		{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
@@ -120,6 +118,8 @@ public class Minimax {
 	 */
 	public double minimax(int depth, double alpha, double beta, boolean whiteTurn) {
 		if(!b.movesAvailable()) {
+			System.out.println("No moves available for " + b.getTurn());
+			System.out.println(b);
 			return b.whiteTurn() ? -999 : 999;
 		} else if(depth == 0) {
 			return evaluatePosition();

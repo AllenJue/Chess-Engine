@@ -9,7 +9,6 @@
  */
 
 import java.util.List;
-import java.util.ArrayList;
 public abstract class Piece {
 	public static final int[] DIAGONAL_DIR = new int[] {-1, -1, 1, 1, -1};
 	public static final int[] LATERAL_DIR = new int[] {-1, 0 , 1, 0, -1};
