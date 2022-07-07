@@ -487,8 +487,12 @@ public class gui extends JFrame {
 			// no more moves, either a stalemate or checkmate
 			if(!movesAvailable) {
 				gameOver = true;
-				String winner = b.whiteTurn() ? "B" : "W";
-				gameText.setText("Game over. " +  winner + " wins!");
+				if(b.inCheck(b.whiteTurn())) {
+					String winner = b.whiteTurn() ? "B" : "W";
+					gameText.setText("Game over. " +  winner + " wins!");
+				} else {
+					gameText.setText("Game over. Stalemate");
+				}
 			} 
 			setEval(functionalBoard);
 			turnCounter.setText((b.getTurn() + " turn"));	

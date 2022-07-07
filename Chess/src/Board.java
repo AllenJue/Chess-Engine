@@ -1247,6 +1247,9 @@ public class Board {
 		return movesAvailable;
 	}
 	
+	/**
+	 * Clears the move list, removes any repeated moves
+	 */
 	public void clearPieces() {
 		for(Piece p : blackPieces.keySet()) {
 			blackPieces.get(p).clear();
@@ -1254,6 +1257,16 @@ public class Board {
 		for(Piece p : whitePieces.keySet()) {
 			whitePieces.get(p).clear();
 		}
+	}
+	
+	/**
+	 * Gets if a player is in check
+	 * @param color of current player
+	 * @return true if in check
+	 */
+	public boolean inCheck(boolean color) {
+		Piece king = color ? whiteKing : blackKing;
+		return !isSafe(color, king.getRow(), king.getCol());
 	}
 	
 	public void countPieces() {

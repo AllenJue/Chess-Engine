@@ -118,8 +118,9 @@ public class Minimax {
 	 */
 	public double minimax(int depth, double alpha, double beta, boolean whiteTurn) {
 		if(!b.movesAvailable()) {
-			System.out.println("No moves available for " + b.getTurn());
-			System.out.println(b);
+			if(!b.inCheck(whiteTurn)) {
+				return 0;
+			}
 			return b.whiteTurn() ? -999 : 999;
 		} else if(depth == 0) {
 			return evaluatePosition();
