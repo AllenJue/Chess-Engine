@@ -27,7 +27,7 @@ The toolbar's text changes when certain board states occur, such as checkmate. T
 * Re-implement the promotion popup, as currently pawns that promote are automatically promoted to queens
 
 ## Technologies
-* Java 8
+* Java 8 (update 301 preferred)
 * Java Swing
 * Java FX
 
