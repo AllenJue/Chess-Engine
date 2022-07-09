@@ -24,6 +24,7 @@ public class Pawn extends Piece {
 		en_passant = 0;
 	}
 
+	
 	/**
 	 * Constructor that creates a pawn from a given piece 
 	 * @param p piece to be copied
@@ -34,6 +35,7 @@ public class Pawn extends Piece {
 		promotedPiece = null;
 		en_passant = 0;
 	}
+	
 	
 	/**
 	 * Constructor for a specific type at row and col
@@ -47,9 +49,9 @@ public class Pawn extends Piece {
 		promotedPiece = null;
 	}
 	
+	
 	/**
 	 * Gets the valid pawn moves if it is the correct turn
-	 * TODO: en_passant and promotion
 	 * @param p pawn selected
 	 * @param i current row
 	 * @param j current column
@@ -85,6 +87,16 @@ public class Pawn extends Piece {
 		return moves;
 	}
 	
+	
+	/**
+	 * Gets the enpassant moves
+	 * @param b functional board
+	 * @param p pawn
+	 * @param moves list of moves
+	 * @param i current row
+	 * @param j current column
+	 * @param forwardMove direction of forward move
+	 */
 	private void addEnPassant(Board b, Piece p, List<int[]> moves, int i, int j, int forwardMove) {
 		for(int k = 0; k < PAWN_DIR.length; k++) {
 			int colChange = j + PAWN_DIR[k];
@@ -102,6 +114,7 @@ public class Pawn extends Piece {
 		}
 	}
 
+	
 	/**
 	 * Gets the capture moves for a pawn
 	 * @param b functional board
@@ -125,6 +138,7 @@ public class Pawn extends Piece {
 		}
 	}
 	
+	
 	/**
 	 * Sets the en_passant ply of a pawn to the board state
 	 * @param b functional board
@@ -132,6 +146,7 @@ public class Pawn extends Piece {
 	public void setPly(Board b) {
 		this.en_passant = b.getPly();
 	}
+	
 	
 	/**
 	 * Sets the en_passant ply of a pawn to a specified int
@@ -141,12 +156,14 @@ public class Pawn extends Piece {
 		this.en_passant = ply;
 	}
 	
+	
 	/**
 	 * Gets the ply of the piece when it was last moved two squares
 	 */
 	public int getPly() {
 		return en_passant;
 	}
+	
 	
 	/**
 	 * Gets the type of the piece 
@@ -155,6 +172,7 @@ public class Pawn extends Piece {
 	public char getType() {
 		return isPromoted() ? 'Q' : 'P';
 	}
+	
 	
 	/**
 	 * Automatically promote a pawn to a queen. The piece will now be considered a Queen
@@ -165,6 +183,7 @@ public class Pawn extends Piece {
 		promotedPiece = new Queen(pType, row, col);
 	}
 	
+	
 	/**
 	 * Gets if a pawn is promoted
 	 * @return this.promoted
@@ -173,20 +192,12 @@ public class Pawn extends Piece {
 		return promoted;
 	}
 	
+	
 	/**
 	 * Unpromotes a pawn. Used when undoing a promotion move
 	 */
 	public void depromote() {
 		promoted = false;
 		promotedPiece = null;
-	}
-	
-	@Override
-	public boolean equals(Object obj) {
-		if(obj instanceof Pawn) {
-			Pawn p = (Pawn)obj;
-			return p.getInitialR() == this.getInitialR() && p.getInitialC() == this.getInitialC();
-		}
-		return false;
 	}
 }

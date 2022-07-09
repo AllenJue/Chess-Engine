@@ -160,13 +160,4 @@ public class King extends Piece {
 	public boolean getCastlingRights() {
 		return castlingRights;
 	}
-	
-	@Override
-	public boolean equals(Object obj) {
-		if(obj instanceof King) {
-			King p = (King)obj;
-			return p.getInitialR() == this.getInitialR() && p.getInitialC() == this.getInitialC();
-		}
-		return false;
-	}
 }

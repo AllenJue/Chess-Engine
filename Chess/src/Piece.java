@@ -37,6 +37,7 @@ public abstract class Piece {
 		white = row >= 6;
 	}
 	
+	
 	/**
 	 * Constructor that copies the fields of an existing Piece and makes a copy
 	 * @param p Piece to be copied
@@ -50,6 +51,7 @@ public abstract class Piece {
 		INITIAL_R = p.INITIAL_R;
 		INITIAL_C = p.INITIAL_C;
 	}
+	
 	
 	/**
 	 * Constructor for piece based on FEN character
@@ -66,6 +68,7 @@ public abstract class Piece {
 		white = Character.isUpperCase(pType);
 		type = Character.toUpperCase(pType);
 	}
+	
 	
 	/**
 	 * Gets the String representation of a Piece, which includes: type and color
@@ -88,6 +91,7 @@ public abstract class Piece {
 		return sb.toString();
 	}
 	
+	
 	/**
 	 * Gets the character representation of a piece
 	 * @return the type of the piece
@@ -95,6 +99,7 @@ public abstract class Piece {
 	public char getType() {
 		return this.type;
 	}
+	
 	
 	/**
 	 * Gets if a piece is white
@@ -104,6 +109,7 @@ public abstract class Piece {
 		return white;
 	}
 	
+	
 	/**
 	 * Gets color of a piece
 	 * @return if(isWhite()) return "W" : "B"
@@ -111,6 +117,7 @@ public abstract class Piece {
 	public String getColor() {
 		return isWhite() ? "W" : "B";
 	}
+	
 	
 	/**
 	 * Parent method for getting the moveset of a piece selected
@@ -122,6 +129,7 @@ public abstract class Piece {
 	 * @return a list of valid coordinates to move to
 	 */
 	public abstract List<int[]> getMoves(Board b, List<int[]> moves, Piece p, int i, int j);
+	
 	
 	/**
 	 * Gets the valid moves along a specified direction given a piece and it position
@@ -149,6 +157,7 @@ public abstract class Piece {
 		}
 	}
 	
+	
 	/**
 	 * Gets if the two pieces selected are different colors
 	 * @param p first piece
@@ -159,6 +168,7 @@ public abstract class Piece {
 		return p2 == null || !p.getColor().equals(p2.getColor());
 	}
 	
+	
 	/**
 	 * Returns true if the piece selected is the correct turn
 	 * @param b functional board
@@ -168,12 +178,14 @@ public abstract class Piece {
 		return this.getColor().equals(b.getTurn()); 
 	}
 	
+	
 	/**
 	 * Sets castling rights for King and Rook
 	 */
 	public void setCastlingRights(boolean change) {
 		// holder for King and rook; other pieces can not castle
 	}
+	
 	
 	/**
 	 * Sets the plt of a piece to a board state
@@ -182,6 +194,7 @@ public abstract class Piece {
 	public void setPly(Board b) {
 		// holder for Pawn setting ply
 	}
+	
 	
 	/**
 	 * Sets the ply of a piece to a specified number
@@ -201,6 +214,7 @@ public abstract class Piece {
 		return false;
 	}
 	
+	
 	/**
 	 * Gets if a piece is a queen type
 	 * @return this.type == 'Q'
@@ -208,6 +222,7 @@ public abstract class Piece {
 	public boolean isQueen() {
 		return this.type == 'Q' || (this.type == 'P' && isPromoted());
 	}
+	
 	
 	/**
 	 * Gets if a piece is a pawn type
@@ -217,6 +232,7 @@ public abstract class Piece {
 		return this.type == 'P' && !isPromoted();
 	}
 	
+	
 	/**
 	 * Gets if a piece is a King type
 	 * @return this.type == 'K'
@@ -224,6 +240,7 @@ public abstract class Piece {
 	public boolean isKing() {
 		return this.type == 'K';
 	}
+	
 	
 	/**
 	 * Gets if a piece is a knight type
@@ -233,6 +250,7 @@ public abstract class Piece {
 		return this.type == 'N';
 	}
 	
+	
 	/**
 	 * Gets if a piece is a bishop type
 	 * @return this.type == 'B'
@@ -240,6 +258,7 @@ public abstract class Piece {
 	public boolean isBishop() {
 		return this.type == 'B';
 	}
+	
 	
 	/**
 	 * Gets if a piece is a rook type
@@ -249,6 +268,7 @@ public abstract class Piece {
 		return this.type == 'R';
 	}
 
+	
 	/**
 	 * Updates row and column of a piece to be a new location
 	 * @param i new row for a piece
@@ -259,6 +279,7 @@ public abstract class Piece {
 		this.c = j;
 	}
 	
+	
 	/**
 	 * Gets the row location of a piece
 	 * @return this.r
@@ -266,6 +287,7 @@ public abstract class Piece {
 	public int getRow() {
 		return this.r;
 	}
+	
 	
 	/**
 	 * Gets the col location of a piece
@@ -275,6 +297,7 @@ public abstract class Piece {
 		return this.c;
 	}
 	
+	
 	/**
 	 * Changes the type of the piece. Used for promotion
 	 * @param pTpye new type for piece
@@ -282,6 +305,7 @@ public abstract class Piece {
 	public void changeType(char pTpye) {
 		type = pTpye;
 	}
+	
 	
 	/**
 	 * Gets the ply of the piece (when it was last moved)
@@ -291,6 +315,7 @@ public abstract class Piece {
 		return -1;
 	}
 	
+	
 	/**
 	 * Gets if a piece is captured
 	 * @return this.captured
@@ -299,13 +324,22 @@ public abstract class Piece {
 		return captured;
 	}
 	
+	
+	/**
+	 * Capture a piece by toggling its captured field to true
+	 */
 	public void capture() {
 		captured = true;
 	}
 	
+	
+	/**
+	 * Uncapture a piece by toggling its captured field to false
+	 */
 	public void uncapture() {
 		captured = false;
 	}
+	
 	
 	/**
 	 * Promotes a piece automatically
@@ -316,6 +350,7 @@ public abstract class Piece {
 		// placeholder for pawn promotion
 	}
 	
+	
 	/**
 	 * Gets if a piece is promoted
 	 * @return false for any piece that's not a pawn
@@ -324,6 +359,7 @@ public abstract class Piece {
 		return false;
 	}
 	
+	
 	/**
 	 * Depromotes a piece back into a pawn
 	 */
@@ -331,6 +367,12 @@ public abstract class Piece {
 		// placeholder for pawn depromotion
 	}
 	
+	
+	/**
+	 * Hashcode depends on the color of a piece and its initial row and column.
+	 * Needed for HashMap comparator to identify the same piece
+	 * @return int hashcode for a piece
+	 */
 	@Override
 	public int hashCode() {
 		int code = 0;
@@ -342,14 +384,34 @@ public abstract class Piece {
 		return code;
 	}
 	
+	
+	/**
+	 * Gets the initial row of a piece
+	 * @return INITIAL_R
+	 */
 	public int getInitialR() {
 		return INITIAL_R;
 	}
 	
+	
+	/**
+	 * Gets the initial column of a piece
+	 * @return INITIAL_C
+	 */
 	public int getInitialC() {
 		return INITIAL_C;
 	}
 	
+	
+	/**
+	 * Gets if a piece is equal to another piece
+	 */
 	@Override
-	public abstract boolean equals(Object obj);
+	public  boolean equals(Object obj) {
+		if(obj instanceof Piece) {
+			Piece p = (Piece)obj;
+			return p.getInitialR() == this.getInitialR() && p.getInitialC() == this.getInitialC();
+		}
+		return false;
+	}
 }

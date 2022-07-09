@@ -51,13 +51,4 @@ public class Bishop extends Piece {
 		}
 		return moves;
 	}
-	
-	@Override
-	public boolean equals(Object obj) {
-		if(obj instanceof Bishop) {
-			Bishop p = (Bishop)obj;
-			return p.getInitialR() == this.getInitialR() && p.getInitialC() == this.getInitialC();
-		}
-		return false;
-	}
 }

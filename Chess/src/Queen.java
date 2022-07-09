@@ -53,13 +53,4 @@ public class Queen extends Piece {
 		}
 		return moves;
 	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if(obj instanceof Queen) {
-			Queen p = (Queen)obj;
-			return p.getInitialR() == this.getInitialR() && p.getInitialC() == this.getInitialC();
-		}
-		return false;
-	}
 }

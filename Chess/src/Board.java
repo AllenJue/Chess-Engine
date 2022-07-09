@@ -46,6 +46,7 @@ public class Board {
 	private ArrayDeque<Boolean> prevCastle;
 	private final Piece NULL_PIECE = new Pawn(0, -1, -1);
 	
+	
 	/**
 	 * Initialize empty board with pieces
 	 */
@@ -55,6 +56,7 @@ public class Board {
 		movesAvailable = generateAllMoves();
 	}
 
+	
 	/**
 	 * Constructor for a board that creates a copy of the existing board
 	 * @param b board to be copied
@@ -87,6 +89,7 @@ public class Board {
 		generateAllMoves();
 	}
 	
+	
 	/**
 	 *	Create a new board 
 	 */
@@ -95,6 +98,7 @@ public class Board {
 		initializeBoard();
 		generateAllMoves();
 	}
+	
 	
 	/**
 	 * Initializes the board to a default starting position
@@ -118,6 +122,7 @@ public class Board {
 		undoFEN.offer(generateFEN());
 	}
 	
+	
 	/**
 	 * Initializes default fields for a board
 	 */
@@ -136,6 +141,7 @@ public class Board {
 		prevCastle = new ArrayDeque<>();
 	}
 	
+	
 	/**
 	 * Initializes a board with a fen
 	 * @param FEN initializing FEN
@@ -153,6 +159,7 @@ public class Board {
 		assignEnPassant(parsedFen[3]);
 	}
 
+	
 	/**
 	 * Assigns to a pawn the correct ply given its en passant square, marking it
 	 * as capturable
@@ -168,6 +175,7 @@ public class Board {
 			}
 		}
 	}
+	
 
 	/**
 	 * Gets the positional square on the board from algebraic notation
@@ -184,6 +192,7 @@ public class Board {
 		return new int[] {row, col};
 	}
 	
+	
 	/**
 	 * Gets the algebraic notation from a positional square on the board
 	 * @param coordinates position of square on board
@@ -199,6 +208,7 @@ public class Board {
 		return sb.toString();
 	}
 
+	
 	/**
 	 * Assign castling rights of kings based on a FEN
 	 * @param castling rights - the third field of a FEN
@@ -211,6 +221,7 @@ public class Board {
 		FenCanCastle(temp, whiteKing, 'K', 'Q');
 		FenCanCastle(temp, blackKing, 'k', 'q');
 	}
+	
 	
 	/**
 	 * Establishes the castling rights based on the FEN
@@ -237,6 +248,7 @@ public class Board {
 		}
 	}
 
+	
 	/**
 	 * Place the pieces based on the first field of the FEN
 	 * @param pieces arrangement in FEN
@@ -273,6 +285,7 @@ public class Board {
 		}
 	}
 	
+	
 	/**
 	 * Gets the piece list for a desired color
 	 * @param isWhite the color desired (isWhite == whitePieces)
@@ -281,6 +294,7 @@ public class Board {
 	public HashMap<Piece, List<int[]>> getPieceList(boolean isWhite) {
 		return isWhite ? whitePieces : blackPieces;
 	}
+	
 	
 	/**
 	 * Gets all the moves for a specific color. Returns true if there is at least one move
@@ -304,6 +318,7 @@ public class Board {
 		}
 		return size > 0;
 	}
+	
 	
 	/**
 	 * Get the piece at on board location
@@ -361,6 +376,7 @@ public class Board {
 		}
 		return sb.toString();
 	}
+	
 	
 	/**
 	 * 
@@ -434,6 +450,7 @@ public class Board {
 		return true;
 	}
 	
+	
 	/**
 	 * Return if square board[i][j] is safe, given that a piece is of the same color is moving
 	 * from board[movedFromI][movedFromJ] to board[movedToI][movedToJ]. Used to see if a king
@@ -470,6 +487,7 @@ public class Board {
 		return true;
 	}
 	
+	
 	/**
 	 * Gets if a piece is safe after a potentially different piece has been moved
 	 * @param color of ally pieces
@@ -491,6 +509,7 @@ public class Board {
 		return true;
 	}
 
+	
 	/**
 	 * Helper for knight safe with move. Basically makes sure that if the piece has captured a knight, do not
 	 * consider that knight dangerous
@@ -508,6 +527,7 @@ public class Board {
 		return false;
 	}
 
+	
 	/**
 	 * Gets if a line is safe given that a piece has been moved with color 
 	 * @param color of ally pieces
@@ -542,6 +562,7 @@ public class Board {
 		return true;
 	}
 	
+	
 	/**
 	 * Gets if a particular line (lateral or diagonal) extending from square (i, j)
 	 * is attacked by an enemy piece.
@@ -573,6 +594,7 @@ public class Board {
 		return true;
 	}
 	
+	
 	/**
 	 * Gets if a square is safe from a pawn
 	 * @param i row of square
@@ -590,6 +612,7 @@ public class Board {
 		}
 		return true;
 	}
+	
 	
 	/**
 	 * Gets if a square is safe from a pawn with a move
@@ -613,6 +636,7 @@ public class Board {
 		return true;
 	}
 	
+	
 	/**
 	 * Gets if a square is safe from a Knight
 	 * @param i row of square
@@ -631,6 +655,7 @@ public class Board {
 		return true;
 	}
 	
+	
 	/**
 	 * Gets if a square is a knight of the opposite color
 	 * @param color to be compared against
@@ -644,6 +669,7 @@ public class Board {
 		}
 		return false;
 	}
+	
 	
 	/**
 	 * Gets if a square is safe from a King
@@ -661,6 +687,7 @@ public class Board {
 		return true;
 	}
 	
+	
 	/**
 	 * Checks if square board[i][j] is a king of the opposite color
 	 * @param color to be compared against
@@ -676,6 +703,7 @@ public class Board {
 		return true;
 	}
 
+	
 	/**
 	 * Gets whether or not the square in question is empty (no piece is inhabiting the square)
 	 * @param i row of the board
@@ -686,6 +714,7 @@ public class Board {
 		return board[i][j] == null;
 	}
 
+	
 	/**
 	 * Moves a piece from prevPo to targPo
 	 * @param prevPo previous position
@@ -717,6 +746,7 @@ public class Board {
 		lastMoved.offer(board[targPo[1]][targPo[0]]);
 	}
 
+	
 	/**
 	 * Moves the rook correctly if a castle has occurred
 	 * @param prevPo previous position of king
@@ -735,6 +765,7 @@ public class Board {
 		}
 	}
 
+	
 	/**
 	 * Remove a piece from the board by setting its value to null
 	 * @param kill the piece at killSquare
@@ -750,6 +781,7 @@ public class Board {
 		board[killSquare[1]][killSquare[0]].capture();
 		board[killSquare[1]][killSquare[0]] = null;
 	}
+	
 	
 	/**
 	 * Remove a piece from the hashmap of pieces available given a piece's move. 
@@ -769,6 +801,7 @@ public class Board {
 			captured.offer(NULL_PIECE);
 		}
 	}
+	
 	
 	/**
 	 * Updates the piece map when a piece moves. The piece map should
@@ -804,6 +837,7 @@ public class Board {
 		board[prevPo[1]][prevPo[0]] = null;
 	}
 	
+	
 	/**
 	 * Keep track of the king piece when it moves
 	 * @param prevPo
@@ -819,6 +853,7 @@ public class Board {
 		}
 	}
 	
+	
 	/**
 	 * Checks if en_passant is possible for a pawn for the next move (if it moves two squares ahead)
 	 * @param prevPo previous posiiton of pawn
@@ -832,6 +867,7 @@ public class Board {
 		}
 	}
 
+	
 	/**
 	 * Gets if an enpassant has occurred on the board
 	 * @param b functional board
@@ -847,6 +883,7 @@ public class Board {
 		// en_passant if pawn is moving diagonally to an empty square. need to remove the adjacent pawn
 	}
 	
+	
 	/**
 	 * Gets if a promotion should occur. When a pawn reaches the opposite side of its board
 	 * @param b functional board
@@ -858,6 +895,7 @@ public class Board {
 		// pawn is promoting if it has reached the last row for its corresponding color
 		return p.isPawn() && ((p.isWhite() && targPo[1] == 0) || (!p.isWhite() && targPo[1] == 7));
 	}
+	
 	
 	/**
 	 * Generates a FEN from a board position
@@ -913,6 +951,7 @@ public class Board {
 		return sb.toString();
 	}
 	
+	
 	/**
 	 * Gets the FEN enpassant code ('-' if no enpassant available)
 	 * @param sb total FEN string to append en passant rights to
@@ -929,6 +968,7 @@ public class Board {
 		sb.append(' ');
 	}
 
+	
 	/**
 	 * Gets the FEN castling rights from a board
 	 * K means white kingside castle possible
@@ -980,6 +1020,7 @@ public class Board {
 		sb.append(' ');
 	}
 
+	
 	/**
 	 * Undoes a singular move if possible
 	 */
@@ -1036,6 +1077,7 @@ public class Board {
 		}
 	}
 	
+	
 	/**
 	 * Automatically unpromotes a queen to a pawn
 	 * @param lastP pawn to be depromoted
@@ -1051,41 +1093,28 @@ public class Board {
 		}
 	}
 
+	
 	/**
 	 * umoves a castling rook. Reassigns correct positions // TODO properly undo castling rook amd King
 	 * @param prevPo
 	 */
 	private void unmoveCastlingRook(int[] prevPo) {
-		if(prevPo[0] == 6) {
-			board[prevPo[1]][7] = board[prevPo[1]][5];
-			board[prevPo[1]][7].setCastlingRights(true);
-			board[prevPo[1]][7].setLocations(prevPo[1], 7);
-			Piece p = board[prevPo[1]][7];
-			HashMap<Piece, List<int[]>> colorPieces = whiteTurn ? whitePieces : blackPieces;
-			for(Piece bp : colorPieces.keySet()) {
-				if(p.equals(bp)) {
-					bp.setLocations(prevPo[1], 7);
-					bp.setCastlingRights(true);
-					break;
-				}
+		int[] cols = prevPo[0] == 6 ? new int[] {7, 5} : new int[] {0, 3};
+		board[prevPo[1]][cols[0]] = board[prevPo[1]][cols[1]];
+		board[prevPo[1]][cols[0]].setCastlingRights(true);
+		board[prevPo[1]][cols[0]].setLocations(prevPo[1], cols[1]);
+		Piece p = board[prevPo[1]][cols[0]];
+		HashMap<Piece, List<int[]>> colorPieces = whiteTurn ? whitePieces : blackPieces;
+		for(Piece bp : colorPieces.keySet()) {
+			if(p.equals(bp)) {
+				bp.setLocations(prevPo[1], cols[0]);
+				bp.setCastlingRights(true);
+				break;
 			}
-			board[prevPo[1]][5] = null;
-		} else {
-			board[prevPo[1]][0] = board[prevPo[1]][3];
-			board[prevPo[1]][0].setCastlingRights(true);
-			board[prevPo[1]][0].setLocations(prevPo[1], 0);
-			Piece p = board[prevPo[1]][0];
-			HashMap<Piece, List<int[]>> colorPieces = whiteTurn ? whitePieces : blackPieces;
-			for(Piece bp : colorPieces.keySet()) {
-				if(p.equals(bp)) {
-					bp.setLocations(prevPo[1], 0);
-					bp.setCastlingRights(true);
-					break;
-				}
-			}
-			board[prevPo[1]][3] = null;
 		}
+		board[prevPo[1]][cols[1]] = null;
 	}
+	
 	
 	/**
 	 * Redoes a singular move if possible
@@ -1093,6 +1122,7 @@ public class Board {
 	public void redoMove() {
 		
 	}
+	
 	
 	/**
 	 * Undos a move by initializing the board with the previous FEN
@@ -1105,6 +1135,7 @@ public class Board {
 		}
 	}
 	
+	
 	/**
 	 * Redoes a move based on the moves stored in redo Stack
 	 */
@@ -1115,6 +1146,7 @@ public class Board {
 			initializeWithFen(redoPos);
 		}
 	}
+	
 	
 	/**
 	 * Basically a constructor for new piece of type p.getType()
@@ -1139,6 +1171,7 @@ public class Board {
 				throw new IllegalArgumentException("Unexpected value: " + p.getType());
 		}
 	}
+	
 	
 	/**
 	 * Creates a new piece of type p.getType()
@@ -1165,6 +1198,7 @@ public class Board {
 				throw new IllegalArgumentException("Unexpected value: " + classifier[col]);
 		}
 	}
+	
 	
 	/**
 	 * Creates a new piece based on a character pType and puts it at row and col
@@ -1197,6 +1231,7 @@ public class Board {
 		}
 	}
 	
+	
 	/**
 	 * Sets a piece at position targPo to be specified type
 	 * @param targPo location to set piece
@@ -1215,6 +1250,7 @@ public class Board {
 		colorPieces.put(board[targPo[1]][targPo[0]], new ArrayList<>());
 	}
 	
+	
 	/**
 	 * Toggles the turn of the game
 	 */
@@ -1222,9 +1258,15 @@ public class Board {
 		whiteTurn = !whiteTurn;
 	}
 	
+	
+	/**
+	 * Gets the current turn
+	 * @return true if it is white's turn
+	 */
 	public boolean whiteTurn() {
 		return whiteTurn;
 	}
+	
 	
  	/**
 	 * Gets the ply of the board
@@ -1234,10 +1276,15 @@ public class Board {
 		return ply;
 	}
 	
+	/**
+	 * Gets undo FEN array deque
+	 * @return undoFEN
+	 */
 	public ArrayDeque<String> getUndoFEN() {
 		return undoFEN;
 	}
 
+	
 	/**
 	 * Gets if there are moves available for the current player's turn. If
 	 * moves available == 0, game is over
@@ -1246,6 +1293,7 @@ public class Board {
 	public boolean movesAvailable() {
 		return movesAvailable;
 	}
+	
 	
 	/**
 	 * Clears the move list, removes any repeated moves
@@ -1259,6 +1307,7 @@ public class Board {
 		}
 	}
 	
+	
 	/**
 	 * Gets if a player is in check
 	 * @param color of current player
@@ -1269,6 +1318,10 @@ public class Board {
 		return !isSafe(color, king.getRow(), king.getCol());
 	}
 	
+	
+	/**
+	 * For debugging purposes. Ensures that the board state is the same after running minimax
+	 */
 	public void countPieces() {
 		int counted = 0;
 		for(Piece[] row : board) { 
@@ -1290,10 +1343,19 @@ public class Board {
 		}
 	}
 	
+	/**
+	 * For debugging purposes. Gets the captured pieces
+	 * @return captured
+	 */
 	public ArrayDeque<Piece> getCaptured() {
 		return captured;
 	}
 
+	
+	/**
+	 * For debugging purposes. Gets the actual number of captured pieces
+	 * @return an array deque with the actual captured pieces
+	 */
 	public ArrayDeque<Piece> actualCaptured() {
 		ArrayDeque<Piece> ad = new ArrayDeque<>();
 		for(Piece p : blackPieces.keySet()) {

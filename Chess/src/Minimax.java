@@ -5,7 +5,6 @@ import java.util.List;
 
 public class Minimax {
 	private Board b;
-	private int counter = 0;
 	private final double[][] pawnValues = {
 		{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
 		{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0},			
@@ -72,6 +71,7 @@ public class Minimax {
 		{1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0}
 	};
 	
+	
 	/**
 	 * Pair class to get the moves and evaluation in a single object
 	 *
@@ -103,10 +103,15 @@ public class Minimax {
 		}
 	}
 	
+	
+	/**
+	 * Minimax constructor that contains a reference to a functional board
+	 * @param bCopy functional board reference
+	 */
 	public Minimax(Board bCopy) {
 		b = bCopy;
-		
 	}
+	
 	
 	/**
 	 * Minimax method that uses alpha-beta pruning to determine the optimal move for a player
@@ -174,6 +179,7 @@ public class Minimax {
 		}
 	}
 	
+	
 	/**
 	 * Makes a deep copy of a hashmap of moves, which avoids concurrent modification
 	 * @param copy map to copy
@@ -191,12 +197,12 @@ public class Minimax {
 		return deepCopy;
 	}
 	
+	
 	/**
 	 * Static evaluation function that estimates the value of a board state 
 	 * @return the sum of the values of each player's pieces
 	 */
 	public double evaluatePosition() {
-		counter++;
 		double score = 0;
 		HashMap<Piece, List<int[]>> whitePieces = b.getPieceList(true);
 		for(Piece p : whitePieces.keySet()) {
@@ -214,6 +220,7 @@ public class Minimax {
 		return score;
 	}
 	
+	
 	/**
 	 * Gets the piece value from a piece value table
 	 * @param p piece whose value needs to be returned
@@ -227,6 +234,7 @@ public class Minimax {
 		int col = p.getCol();
 		return pieceTable[row][col];
 	}
+	
 	
 	/**
 	 * Gets the corresponding piece table for a piece type
@@ -250,9 +258,5 @@ public class Minimax {
 		default:
 			throw new IllegalArgumentException("Piece type is not valid");
 		}
-	}
-	
-	public int getCounter() {
-		return counter;
 	}
 }

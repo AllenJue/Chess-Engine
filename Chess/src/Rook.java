@@ -20,6 +20,7 @@ public class Rook extends Piece {
 		castlingRights = true;
 	}
 
+	
 	/**
 	 * Constructor for a copy of a Rook given an existing piece
 	 * @param p piece to be copied
@@ -28,6 +29,7 @@ public class Rook extends Piece {
 		super(p);
 	}
 
+	
 	/**
 	 * Constructor for a specific type at row and col
 	 * @param pType
@@ -37,6 +39,7 @@ public class Rook extends Piece {
 	public Rook(char pType, int row, int col) {
 		super(pType, row, col);
 	}
+	
 	
 	/**
 	 * Gets the valid moveset for a rook at row i and column j
@@ -54,6 +57,7 @@ public class Rook extends Piece {
 		return moves;
 	}
 	
+	
 	/**
 	 * Sets castling rights to change
 	 * @param change update to castling rights
@@ -62,20 +66,12 @@ public class Rook extends Piece {
 		castlingRights = change;
 	}
 	
+	
 	/**
 	 * Returns true if the rook has not moved from its starting position
 	 * @return castlingRights
 	 */
 	public boolean getCastlingRights() {
 		return castlingRights;
-	}
-	
-	@Override
-	public boolean equals(Object obj) {
-		if(obj instanceof Rook) {
-			Rook p = (Rook)obj;
-			return p.getInitialR() == this.getInitialR() && p.getInitialC() == this.getInitialC();
-		}
-		return false;
 	}
 }

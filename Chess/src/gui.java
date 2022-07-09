@@ -242,6 +242,7 @@ public class gui extends JFrame {
 		}
 	}
 	
+	
 	/**
 	 * Create a board with an array of button squares given a starting board position
 	 * @param b starting board position
@@ -270,13 +271,13 @@ public class gui extends JFrame {
 					  } catch (Exception ex) {
 					    System.out.println(ex);
 					  }
-					// boardSquares[i][j].setText(b.getPieceName(j, i));
 				} else {
 					button.setIcon(null);
 				}
 			}
 		}
 	}
+	
 	
 	/**
 	 * Gets the icon from pieceIcons given a pieces row and column
@@ -311,9 +312,11 @@ public class gui extends JFrame {
 	    }
 	    return img;
 	}
+	
+	
 	/**
 	 * Create a tool bar with the functionality of restarting game
-	 * TODO: resign, draw, and restore
+	 * TODO: resign
 	 * @param toolBar Toolbar with buttons
 	 * @param b Board that needs to be reset when reset button selected
 	 */
@@ -387,6 +390,7 @@ public class gui extends JFrame {
 		promotionPanel.setVisible(false);
 	}
 	
+	
 	/**
 	 * Start the game over. Makes a new board
 	 * @param b Board to be reset and re-initialized
@@ -414,6 +418,7 @@ public class gui extends JFrame {
 		setEval(b);
 	}
 	
+	
 	/**
 	 * Selects a square to be highlighted and displays its valid moves
 	 * @param square Selected square to have moves displayed
@@ -435,6 +440,7 @@ public class gui extends JFrame {
 		}
 	}
 	
+	
 	/**
 	 * Gets the evaluation of the board
 	 * @param b functional board
@@ -442,23 +448,21 @@ public class gui extends JFrame {
 	 */
 	private String getEval(Board b) {
 		Minimax mm = new Minimax(b);
-		System.out.println(b.whiteTurn());
-		double eval = mm.minimax(4, -100000, 100000, b.whiteTurn());
-		System.out.println("Number of evaluations: " + mm.getCounter());
-		System.out.printf("Eval: %.5f\n", eval);
+		double eval = mm.minimax(4, -Double.MAX_VALUE, Double.MAX_VALUE, b.whiteTurn());
 		b.clearPieces();
 		b.generateAllMoves();
 		return String.format("Evaluation: %.5f", eval);
 	}
+	
 	
 	/**
 	 * Sets the evaluation text of the board
 	 * @param b functional board
 	 */
 	private void setEval(Board b) {
-		System.out.println("Actual eval: " + new Minimax(b).evaluatePosition());
 		evalText.setText(getEval(b));
 	}
+	
 	
 	/**
 	 * Moves a piece from previously selected piece to a target position on board, b
@@ -502,6 +506,7 @@ public class gui extends JFrame {
 		}
 	}
 	
+	
 	/**
 	 * Updates rook and king icons if castle has occurred
 	 * @param b functional board
@@ -519,6 +524,7 @@ public class gui extends JFrame {
 			}
 		}
 	}
+	
 	
 	/**
 	 * Performs the actual promotion of the pieces by creating the promotion buttons that become visible when a pawn moves
@@ -580,6 +586,7 @@ public class gui extends JFrame {
 		promotionPanel.add(nButton);
 		promotionPanel.add(rButton);
 	}
+	
 	
 	/**
 	 * Change the game state to halt until a pawn is promoted from the promotion panel
