@@ -32,4 +32,5 @@ The toolbar's text changes when certain board states occur, such as checkmate. T
 * Java FX
 
 ## Setup and Launch
-Since the project is written entirely in Java, simply download the project folder, ensure JDK 8 is downloaded, and compile the src files to create executables for the game. Run the main class, with the command ``` Java gui ``` to run create the GUI.
+Download the code as a zip and navigate to the bin directory. From there run:
+```java gui``` to launch the chess game.
