@@ -125,12 +125,13 @@ public class gui extends JFrame {
 //			pieceIcons[0][3] = ImageIO.read(getClass().getResource("/Funny-icons/whiteBishop.png"));
 //			pieceIcons[0][4] = ImageIO.read(getClass().getResource("/Funny-icons/whiteRook.png"));
 //			pieceIcons[0][5] = ImageIO.read(getClass().getResource("/Funny-icons/whiteQueen.png"));
-			pieceIcons[0][0] = ImageIO.read(getClass().getResource("/Styled-icons/WhitePawnStyled.png"));
-			pieceIcons[0][1] = ImageIO.read(getClass().getResource("/Styled-icons/WhiteKingStyled.png"));
-			pieceIcons[0][2] = ImageIO.read(getClass().getResource("/Styled-icons/WhiteKnightStyled.png"));
-			pieceIcons[0][3] = ImageIO.read(getClass().getResource("/Styled-icons/WhiteBishopStyled.png"));
-			pieceIcons[0][4] = ImageIO.read(getClass().getResource("/Styled-icons/WhiteRookStyled.png"));
-			pieceIcons[0][5] = ImageIO.read(getClass().getResource("/Styled-icons/WhiteQueenStyled.png"));
+			System.out.println(getClass().getResource("Styled-icons/WhitePawnStyled.png"));
+			pieceIcons[0][0] = ImageIO.read(getClass().getResource("Styled-icons/WhitePawnStyled.png"));
+			pieceIcons[0][1] = ImageIO.read(getClass().getResource("Styled-icons/WhiteKingStyled.png"));
+			pieceIcons[0][2] = ImageIO.read(getClass().getResource("Styled-icons/WhiteKnightStyled.png"));
+			pieceIcons[0][3] = ImageIO.read(getClass().getResource("Styled-icons/WhiteBishopStyled.png"));
+			pieceIcons[0][4] = ImageIO.read(getClass().getResource("Styled-icons/WhiteRookStyled.png"));
+			pieceIcons[0][5] = ImageIO.read(getClass().getResource("Styled-icons/WhiteQueenStyled.png"));
 //			// black pieces
 //			pieceIcons[1][0] = ImageIO.read(getClass().getResource("/Funny-icons/blackPawn.png"));
 //			pieceIcons[1][1] = ImageIO.read(getClass().getResource("/Funny-icons/blackKing.png"));
@@ -138,12 +139,12 @@ public class gui extends JFrame {
 //			pieceIcons[1][3] = ImageIO.read(getClass().getResource("/Funny-icons/blackBishop.png"));
 //			pieceIcons[1][4] = ImageIO.read(getClass().getResource("/Funny-icons/blackRook.png"));
 //			pieceIcons[1][5] = ImageIO.read(getClass().getResource("/Funny-icons/blackQueen.png"));
-			pieceIcons[1][0] = ImageIO.read(getClass().getResource("/Styled-icons/BlackPawnStyled.png"));
-			pieceIcons[1][1] = ImageIO.read(getClass().getResource("/Styled-icons/BlackKingStyled.png"));
-			pieceIcons[1][2] = ImageIO.read(getClass().getResource("/Styled-icons/BlackKnightStyled.png"));
-			pieceIcons[1][3] = ImageIO.read(getClass().getResource("/Styled-icons/BlackBishopStyled.png"));
-			pieceIcons[1][4] = ImageIO.read(getClass().getResource("/Styled-icons/BlackRookStyled.png"));
-			pieceIcons[1][5] = ImageIO.read(getClass().getResource("/Styled-icons/BlackQueenStyled.png"));
+			pieceIcons[1][0] = ImageIO.read(getClass().getResource("Styled-icons/BlackPawnStyled.png"));
+			pieceIcons[1][1] = ImageIO.read(getClass().getResource("Styled-icons/BlackKingStyled.png"));
+			pieceIcons[1][2] = ImageIO.read(getClass().getResource("Styled-icons/BlackKnightStyled.png"));
+			pieceIcons[1][3] = ImageIO.read(getClass().getResource("Styled-icons/BlackBishopStyled.png"));
+			pieceIcons[1][4] = ImageIO.read(getClass().getResource("Styled-icons/BlackRookStyled.png"));
+			pieceIcons[1][5] = ImageIO.read(getClass().getResource("Styled-icons/BlackQueenStyled.png"));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
