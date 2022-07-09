@@ -442,7 +442,9 @@ public class gui extends JFrame {
 	 */
 	private String getEval(Board b) {
 		Minimax mm = new Minimax(b);
-		double eval = mm.minimax(4, Double.MIN_VALUE, Double.MAX_VALUE, b.whiteTurn());
+		System.out.println(b.whiteTurn());
+		double eval = mm.minimax(4, -100000, 100000, b.whiteTurn());
+		System.out.println("Number of evaluations: " + mm.getCounter());
 		System.out.printf("Eval: %.5f\n", eval);
 		b.clearPieces();
 		b.generateAllMoves();
@@ -454,6 +456,7 @@ public class gui extends JFrame {
 	 * @param b functional board
 	 */
 	private void setEval(Board b) {
+		System.out.println("Actual eval: " + new Minimax(b).evaluatePosition());
 		evalText.setText(getEval(b));
 	}
 	

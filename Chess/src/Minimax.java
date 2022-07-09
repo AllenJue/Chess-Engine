@@ -1,9 +1,11 @@
 import java.util.ArrayList;
+import java.util.Currency;
 import java.util.HashMap;
 import java.util.List;
 
 public class Minimax {
-	Board b;
+	private Board b;
+	private int counter = 0;
 	private final double[][] pawnValues = {
 		{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
 		{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0},			
@@ -125,44 +127,59 @@ public class Minimax {
 		} else if(depth == 0) {
 			return evaluatePosition();
 		}
-		double compEval;
-		if(whiteTurn) {
-			compEval = Double.MIN_VALUE;
-		} else {
-			compEval = Double.MAX_VALUE;
-		}
 		// maximize score if white turn 
-		HashMap<Piece, List<int[]>> pieceListCopy = deepCopy(b.getPieceList(whiteTurn)); // Need to make a DEEP COPY FIX!!!		
-		for(Piece p : pieceListCopy.keySet()) {
-			 // try moving piece
-			int[] prevPo = new int[] {p.getCol(), p.getRow()};
-			for(int[] moves : pieceListCopy.get(p)) {
-				if(!p.isCaptured()) {
-					int[] targPo = new int[] {moves[1], moves[0]};
-					// make move
-					b.move(prevPo, targPo);
-					double eval = minimax(depth - 1, alpha, beta, !whiteTurn);
-					b.undoMove();
-					if(whiteTurn) {
-						compEval = Math.max(compEval, eval);
-						alpha = Math.max(alpha, eval);
-					} else {
-						compEval = Math.min(compEval, eval);
-						beta = Math.min(beta, eval);
-					}
-					if(beta <= alpha) {
-						break;
+		HashMap<Piece, List<int[]>> pieceListCopy = deepCopy(b.getPieceList(whiteTurn)); 
+		if(whiteTurn) {
+			double maxEval = -100000;
+			for(Piece p : pieceListCopy.keySet()) {
+				int[] prevPo = new int[] {p.getCol(), p.getRow()};
+				for(int[] moves : pieceListCopy.get(p)) {
+					if(!p.isCaptured()) {
+						int[] targPo = new int[] {moves[1], moves[0]};
+						b.move(prevPo, targPo);
+						double curEval = minimax(depth - 1, alpha, beta, !whiteTurn);
+						b.undoMove();
+						if(curEval > maxEval) {
+							maxEval = curEval;
+						}
+						alpha = Math.max(alpha, curEval);
+						if(beta <= alpha) {
+							return alpha;
+						}
 					}
 				}
 			}
-			if(beta <= alpha) {
-				break;
+			return maxEval;
+		} else {
+			double minEval = 100000;
+			for(Piece p : pieceListCopy.keySet()) {
+				int[] prevPo = new int[] {p.getCol(), p.getRow()};
+				for(int[] moves : pieceListCopy.get(p)) {
+					if(!p.isCaptured()) {
+						int[] targPo = new int[] {moves[1], moves[0]};
+						b.move(prevPo, targPo);
+						double curEval = minimax(depth - 1, alpha, beta, !whiteTurn);
+						b.undoMove();
+						if(curEval < minEval) {
+							minEval = curEval;
+						}
+						beta = Math.min(beta, curEval);
+						if(beta <= alpha) {
+							return beta;
+						}
+					}
+				}
 			}
+			return minEval;
 		}
-		return compEval;
 	}
 	
-	public HashMap<Piece, List<int[]>> deepCopy(HashMap<Piece, List<int[]>> copy) {
+	/**
+	 * Makes a deep copy of a hashmap of moves, which avoids concurrent modification
+	 * @param copy map to copy
+	 * @return a deep copy of 'copy'
+	 */
+	private HashMap<Piece, List<int[]>> deepCopy(HashMap<Piece, List<int[]>> copy) {
 		HashMap<Piece, List<int[]>> deepCopy = new HashMap<>();
 		for(Piece p : copy.keySet()) {
 			List<int[]> copyList = new ArrayList<>();
@@ -178,20 +195,21 @@ public class Minimax {
 	 * Static evaluation function that estimates the value of a board state 
 	 * @return the sum of the values of each player's pieces
 	 */
-	private double evaluatePosition() {
+	public double evaluatePosition() {
+		counter++;
 		double score = 0;
 		HashMap<Piece, List<int[]>> whitePieces = b.getPieceList(true);
 		for(Piece p : whitePieces.keySet()) {
 			// add to position score for white pieces
 			if(!p.isCaptured()) {
 				score += getPieceValue(p);
-			}
+			} 
 		}
 		HashMap<Piece, List<int[]>> blackPieces = b.getPieceList(false);
 		for(Piece p : blackPieces.keySet()) {
 			if(!p.isCaptured()) {
 				score -= getPieceValue(p);
-			}
+			} 
 		}
 		return score;
 	}
@@ -232,5 +250,9 @@ public class Minimax {
 		default:
 			throw new IllegalArgumentException("Piece type is not valid");
 		}
+	}
+	
+	public int getCounter() {
+		return counter;
 	}
 }
