@@ -125,7 +125,6 @@ public class gui extends JFrame {
 //			pieceIcons[0][3] = ImageIO.read(getClass().getResource("/Funny-icons/whiteBishop.png"));
 //			pieceIcons[0][4] = ImageIO.read(getClass().getResource("/Funny-icons/whiteRook.png"));
 //			pieceIcons[0][5] = ImageIO.read(getClass().getResource("/Funny-icons/whiteQueen.png"));
-			System.out.println(getClass().getResource("Styled-icons/WhitePawnStyled.png"));
 			pieceIcons[0][0] = ImageIO.read(getClass().getResource("Styled-icons/WhitePawnStyled.png"));
 			pieceIcons[0][1] = ImageIO.read(getClass().getResource("Styled-icons/WhiteKingStyled.png"));
 			pieceIcons[0][2] = ImageIO.read(getClass().getResource("Styled-icons/WhiteKnightStyled.png"));
