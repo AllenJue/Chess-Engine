@@ -336,6 +336,7 @@ public class gui extends JFrame {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				b.queueRedo();
 				b.undoMove();
 				// b.undoMoveWithFEN();
 				initializeBoard(b);
@@ -356,14 +357,14 @@ public class gui extends JFrame {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				b.redoMoveWithFEN();
+				b.redoMove();
 				initializeBoard(b);
 				turnCounter.setText(b.getTurn() + " turn");
 				for(JButton jb : validSquares) {
 					jb.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
 				}
 				validSquares.clear();
-				boolean movesAvailable = b.generateAllMoves();
+				boolean movesAvailable = b.movesAvailable();
 				// no more moves, either a stalemate or checkmate
 				if(!movesAvailable) {
 					gameOver = true;
@@ -372,8 +373,8 @@ public class gui extends JFrame {
 				} else {
 					gameOver = false;
 					gameText.setText("Welcome to my chess game.");
-
 				}
+				setEval(b);
 			}
 		};
 		toolBar.add(redoButton);
@@ -487,6 +488,7 @@ public class gui extends JFrame {
 			// move the piece on the functional board
 			b.move(prevPo, targPo);
 			castleOccurred(b, prevPo, targPo);
+			b.clearRedo();
 			// update the gui to display the text based on the updates in the functional board
 			boardSquares[targPo[0]][targPo[1]].setIcon(new ImageIcon(getImage(b, targPo[1], targPo[0])));
 			boardSquares[prevPo[0]][prevPo[1]].setIcon(null); 

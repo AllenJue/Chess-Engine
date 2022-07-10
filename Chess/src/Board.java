@@ -36,15 +36,18 @@ public class Board {
 	private int ply;
 	private int halfMoves;
 	private final int LOCATION_CONVERTER = 50;
-	// Stacks to implement command pattern for redo and undo
+	// Stacks to implement command pattern for redo and undo (TODO change to generate game from PGN / FEN)
 	private ArrayDeque<String> undoFEN;
 	private ArrayDeque<String> redoFEN;
-	// Stacks to implement undo withoutFEN
+	// Stacks to implement undo and redo withoutFEN
 	private ArrayDeque<Piece> captured;
 	private ArrayDeque<Piece> lastMoved;
 	private ArrayDeque<int[]> previousPos;
 	private ArrayDeque<Boolean> prevCastle;
 	private final Piece NULL_PIECE = new Pawn(0, -1, -1);
+	private ArrayDeque<Piece> lastMovedRedo;
+	private ArrayDeque<int[]> moveRedo;
+
 	
 	
 	/**
@@ -73,6 +76,8 @@ public class Board {
 		lastMoved = new ArrayDeque<>(b.lastMoved);
 		previousPos = new ArrayDeque<>(b.previousPos);
 		prevCastle = new ArrayDeque<>(b.prevCastle);
+		lastMovedRedo = new ArrayDeque<>(b.lastMovedRedo);
+		moveRedo = new ArrayDeque<>(b.moveRedo);
 		movesAvailable = b.movesAvailable;
 		for(Piece p : blackPieces.keySet()) {
 			board[p.getRow()][p.getCol()] = createPiece(p);
@@ -133,12 +138,14 @@ public class Board {
 		whiteTurn = true;
 		blackPieces = new HashMap<>();
 		whitePieces = new HashMap<>();
-		undoFEN = new ArrayDeque<>();
 		redoFEN = new ArrayDeque<>();
+		undoFEN = new ArrayDeque<>();
 		previousPos = new ArrayDeque<>();
 		lastMoved = new ArrayDeque<>();
 		captured = new ArrayDeque<>();
 		prevCastle = new ArrayDeque<>();
+		lastMovedRedo = new ArrayDeque<>();
+		moveRedo = new ArrayDeque<>();
 	}
 	
 	
@@ -1028,6 +1035,7 @@ public class Board {
 		if(lastMoved.size() > 0) {
 			changeTurn();
 			ply--;
+			// get last position and last moved piece
 			int[] prevPo = previousPos.removeLast();
 			Piece lastP = lastMoved.removeLast();
 			int[] targPo = new int[] {lastP.getCol(), lastP.getRow()};
@@ -1035,9 +1043,6 @@ public class Board {
 			lastP.setCastlingRights(lastCastle);
 			// put last moved piece in previous position
 			board[prevPo[1]][prevPo[0]] = lastP;
-			// null out where it was
-			board[lastP.getRow()][lastP.getCol()] = null;
-			lastP.setLocations(prevPo[1], prevPo[0]);
 			// replace the captured piece
 			if(captured.peekLast() == NULL_PIECE) {
 				board[targPo[1]][targPo[0]] = null;
@@ -1054,6 +1059,7 @@ public class Board {
 				}
 				capturedP.uncapture();
 			}
+			lastP.setLocations(prevPo[1], prevPo[0]);
 			HashMap<Piece, List<int[]>> colorPieces = getPieceList(whiteTurn);
 			// track the king
 			trackKing(prevPo);
@@ -1120,7 +1126,11 @@ public class Board {
 	 * Redoes a singular move if possible
 	 */
 	public void redoMove() {
-		
+		if(!lastMovedRedo.isEmpty()) {
+			Piece p = lastMovedRedo.removeLast();
+			int[] targPo = moveRedo.removeLast();
+			move(new int[] {p.getCol(), p.getRow()}, targPo);
+		} 
 	}
 	
 	
@@ -1350,7 +1360,7 @@ public class Board {
 	public ArrayDeque<Piece> getCaptured() {
 		return captured;
 	}
-
+	
 	
 	/**
 	 * For debugging purposes. Gets the actual number of captured pieces
@@ -1369,5 +1379,24 @@ public class Board {
 			}
 		}
 		return ad;
+	}
+
+
+	/**
+	 * Queues redo pieces. Used only when redo button is clicked
+	 */
+	public void queueRedo() {
+		// offer redo pieces
+		moveRedo.offer(new int[] {lastMoved.peekLast().getCol(), lastMoved.peekLast().getRow()});
+		lastMovedRedo.offer(lastMoved.peekLast());		
+	}
+	
+	
+	/**
+	 * Clears redo pieces. Used only when manually moving pieces
+	 */
+	public void clearRedo() {
+		lastMovedRedo.clear();
+		moveRedo.clear();
 	}
 }
