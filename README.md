@@ -21,7 +21,6 @@ The toolbar's text changes when certain board states occur, such as checkmate. T
 * Create a list of moves to create a PGN and allow the engine to recreate a game based on a PGN
 * Transition the search algorithm to a deep-learning algorithm
 * Make the game window scalable
-* Implement the redo move function without using a FEN string
 * Implement resign button
 * Create a CPU to play against
 * Re-implement the promotion popup, as currently pawns that promote are automatically promoted to queens
