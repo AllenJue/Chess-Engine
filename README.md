@@ -35,6 +35,6 @@ Java HotSpot(TM) 64-Bit Server VM (build 25.301-b09, mixed mode)``` preferred)
 ## Setup and Launch
 Download the code as a zip and navigate to the bin directory. From there run:
 
-```java gui``` 
+```java Gui``` 
 
 to launch the chess game.
